@@ -1,14 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Jay New Tab Dashboard",
-  "description": "A full-screen customizable new tab with sports, calendar, app shortcuts, and animated backgrounds.",
+  "description": "A full-screen new tab with sports, calendar, app shortcuts, progress widgets, and an anime background.",
   "version": "1.0.0",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
   "host_permissions": [
-    "https://site.api.espn.com/*",
-    "https://api.open-meteo.com/*"
+    "https://site.api.espn.com/*"
   ],
   "browser_specific_settings": {
     "gecko": {

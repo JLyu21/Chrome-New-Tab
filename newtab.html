@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <video id="bgVideo" class="bg-video" autoplay muted loop playsinline></video>
-    <div class="bg-animated-glow" aria-hidden="true"></div>
     <div class="background-overlay"></div>
 
     <main class="dashboard">
@@ -16,36 +14,30 @@
         <div class="hero-left">
           <p id="greeting" class="eyebrow">Good day</p>
           <h1 id="heroTitle">Hi Jay</h1>
-          <p class="hero-subtitle">Locked in, loaded up, and ready for whatever tab you were about to open.</p>
           <p id="liveAge" class="live-age">Age loading...</p>
-          <div class="hero-tags">
-            <span class="hero-tag">Daily launchpad</span>
-            <span class="hero-tag">Live sports radar</span>
-            <span class="hero-tag">Clean shortcut dock</span>
-          </div>
           <form id="searchForm" class="search-form">
             <input id="searchInput" type="text" placeholder="Search Google, paste a URL, check scores, start anything..." autocomplete="off" />
             <button class="button" type="submit">Search</button>
           </form>
         </div>
-        <section class="hero-calendar" aria-label="Calendar">
-          <div class="pane-title">
-            <h2>Calendar</h2>
-            <div class="calendar-controls">
-              <button id="prevMonth" class="button button-small button-secondary" type="button">Prev</button>
-              <button id="nextMonth" class="button button-small button-secondary" type="button">Next</button>
-            </div>
-          </div>
-          <p id="calendarLabel" class="calendar-label">Month Year</p>
-          <div id="calendarGrid" class="calendar-grid" aria-label="Calendar days"></div>
-        </section>
         <div class="hero-right">
           <p id="clock" class="clock-time">--:--</p>
           <p id="date" class="clock-date">---</p>
-          <div class="hero-weather">
-            <p class="hero-weather-label">Weather</p>
-            <p id="weatherMeta" class="hero-weather-value muted">Loading weather...</p>
-            <button id="refreshWeather" class="button button-small button-secondary" type="button">Refresh</button>
+          <div class="hero-progress">
+            <div class="progress-head">
+              <p class="hero-progress-label">Day Progress</p>
+              <p id="dayProgressValue" class="hero-progress-value">--%</p>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <span id="dayProgressBar" class="progress-fill"></span>
+            </div>
+            <div class="progress-head">
+              <p class="hero-progress-label">Year Progress</p>
+              <p id="yearProgressValue" class="hero-progress-value">--%</p>
+            </div>
+            <div class="progress-track progress-track-secondary" aria-hidden="true">
+              <span id="yearProgressBar" class="progress-fill progress-fill-secondary"></span>
+            </div>
           </div>
           <div class="timezone-row">
             <label for="timeZoneSelect">Time zone</label>
@@ -85,6 +77,18 @@
           <ul id="appGrid" class="app-grid"></ul>
         </section>
 
+        <section class="card pane calendar-panel" aria-label="Calendar">
+          <div class="pane-title">
+            <h2>Calendar</h2>
+            <div class="calendar-controls">
+              <button id="prevMonth" class="button button-small button-secondary" type="button">Prev</button>
+              <button id="nextMonth" class="button button-small button-secondary" type="button">Next</button>
+            </div>
+          </div>
+          <p id="calendarLabel" class="calendar-label">Month Year</p>
+          <div id="calendarGrid" class="calendar-grid" aria-label="Calendar days"></div>
+        </section>
+
         <section class="card pane sports-panel">
           <div class="pane-title">
             <h2>Sports Hub</h2>
@@ -98,56 +102,6 @@
           </div>
           <p id="sportsMeta" class="muted">Loading latest scoreboard feed...</p>
           <div id="sportsCards" class="sports-cards"></div>
-        </section>
-
-        <section class="card pane appearance-panel">
-          <div class="pane-title">
-            <h2>Appearance + Animation</h2>
-            <span class="muted">Full-screen visual settings</span>
-          </div>
-          <div class="appearance-grid">
-            <label>
-              Visual preset
-              <select id="visualPreset">
-                <option value="neo-night">Neo Night</option>
-                <option value="sunset-pulse">Sunset Pulse</option>
-                <option value="aurora">Aurora</option>
-                <option value="mono-glass">Mono Glass</option>
-              </select>
-            </label>
-            <label>
-              Motion level
-              <input id="motionLevel" type="range" min="0" max="100" step="5" value="65" />
-            </label>
-            <label>
-              Accent start
-              <input id="colorStart" type="color" value="#1d4ed8" />
-            </label>
-            <label>
-              Accent end
-              <input id="colorEnd" type="color" value="#9333ea" />
-            </label>
-            <label>
-              Background mode
-              <select id="backgroundMode">
-                <option value="animated-gradient">Animated gradient</option>
-                <option value="image">Static image</option>
-                <option value="anime-video">Anime video</option>
-              </select>
-            </label>
-            <label class="wide">
-              Image URL
-              <input id="backgroundImage" type="url" placeholder="https://images.example.com/wallpaper.jpg" />
-            </label>
-            <label class="wide">
-              Anime video URL (mp4/webm)
-              <input id="backgroundVideo" type="url" placeholder="https://cdn.example.com/anime-loop.mp4" />
-            </label>
-          </div>
-          <div class="actions">
-            <button id="saveAppearance" class="button" type="button">Save look</button>
-            <button id="clearImage" class="button button-secondary" type="button">Reset media</button>
-          </div>
         </section>
       </section>
     </main>

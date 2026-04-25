@@ -1,15 +1,15 @@
-# Focus New Tab Dashboard (Manifest V3)
+# Jay New Tab Dashboard (Manifest V3)
 
 A plain HTML/CSS/JavaScript new tab browser extension for Chrome (MV3), with:
 
 - Custom new tab dashboard UI
 - Live clock and date
-- Calendar in the header cluster
+- Calendar in the left dashboard column
 - Google search and URL launching
 - App shortcuts persisted in `localStorage`
 - Sports scoreboard cards
-- Weather summary
-- Custom colors, motion, image backgrounds, and optional video backgrounds
+- Day and year progress widget
+- Packaged anime dragon background image at `assets/dragon-background.png`
 - Light/dark mode toggle
 
 ## Files

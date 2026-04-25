@@ -1,17 +1,9 @@
 const STORAGE_KEYS = {
   apps: "jay_newtab_apps",
-  appearance: "jay_newtab_appearance",
   mode: "jay_newtab_mode",
   focus: "jay_newtab_focus_mode",
   sports: "jay_newtab_sports_preferences",
   timeZone: "jay_newtab_timezone"
-};
-
-const PRESETS = {
-  "neo-night": ["#0f172a", "#7c3aed"],
-  "sunset-pulse": ["#be123c", "#7c2d12"],
-  aurora: ["#0f766e", "#1d4ed8"],
-  "mono-glass": ["#1f2937", "#111827"]
 };
 
 const defaults = {
@@ -22,15 +14,6 @@ const defaults = {
     { id: crypto.randomUUID(), name: "Netease", url: "https://music.163.com/#/", iconUrl: "" },
     { id: crypto.randomUUID(), name: "YouTube", url: "https://youtube.com", iconUrl: "" }
   ],
-  appearance: {
-    colorStart: "#0f172a",
-    colorEnd: "#7c3aed",
-    mode: "animated-gradient",
-    imageUrl: "",
-    videoUrl: "",
-    preset: "neo-night",
-    motionLevel: 65
-  },
   sports: {
     showNba: true,
     showSoccer: true,
@@ -41,7 +24,6 @@ const defaults = {
 
 const state = {
   apps: [],
-  appearance: { ...defaults.appearance },
   mode: "dark",
   focusMode: false,
   sports: { ...defaults.sports },
@@ -73,18 +55,10 @@ const ui = {
   nextMonth: document.getElementById("nextMonth"),
   calendarLabel: document.getElementById("calendarLabel"),
   calendarGrid: document.getElementById("calendarGrid"),
-  refreshWeather: document.getElementById("refreshWeather"),
-  weatherMeta: document.getElementById("weatherMeta"),
-  colorStart: document.getElementById("colorStart"),
-  colorEnd: document.getElementById("colorEnd"),
-  visualPreset: document.getElementById("visualPreset"),
-  motionLevel: document.getElementById("motionLevel"),
-  backgroundMode: document.getElementById("backgroundMode"),
-  backgroundImage: document.getElementById("backgroundImage"),
-  backgroundVideo: document.getElementById("backgroundVideo"),
-  saveAppearance: document.getElementById("saveAppearance"),
-  clearImage: document.getElementById("clearImage"),
-  bgVideo: document.getElementById("bgVideo"),
+  dayProgressValue: document.getElementById("dayProgressValue"),
+  dayProgressBar: document.getElementById("dayProgressBar"),
+  yearProgressValue: document.getElementById("yearProgressValue"),
+  yearProgressBar: document.getElementById("yearProgressBar"),
   toggleNba: document.getElementById("toggleNba"),
   toggleSoccer: document.getElementById("toggleSoccer"),
   toggleF1: document.getElementById("toggleF1"),
@@ -112,7 +86,6 @@ function getClockTimeZone() {
 
 function loadState() {
   state.apps = safeParse(localStorage.getItem(STORAGE_KEYS.apps), defaults.apps);
-  state.appearance = { ...defaults.appearance, ...safeParse(localStorage.getItem(STORAGE_KEYS.appearance), {}) };
   state.mode = localStorage.getItem(STORAGE_KEYS.mode) || "dark";
   state.focusMode = localStorage.getItem(STORAGE_KEYS.focus) === "true";
   state.sports = { ...defaults.sports, ...safeParse(localStorage.getItem(STORAGE_KEYS.sports), {}) };
@@ -121,7 +94,6 @@ function loadState() {
 
 function persistState() {
   localStorage.setItem(STORAGE_KEYS.apps, JSON.stringify(state.apps));
-  localStorage.setItem(STORAGE_KEYS.appearance, JSON.stringify(state.appearance));
   localStorage.setItem(STORAGE_KEYS.mode, state.mode);
   localStorage.setItem(STORAGE_KEYS.focus, String(state.focusMode));
   localStorage.setItem(STORAGE_KEYS.sports, JSON.stringify(state.sports));
@@ -133,16 +105,27 @@ function updateGreeting(hour) {
   if (hour < 12) message = "Good morning";
   else if (hour < 18) message = "Good afternoon";
   ui.greeting.textContent = `${message}, Jay`;
-  ui.heroTitle.textContent = "Jay's Launch Deck";
+  ui.heroTitle.textContent = "Hi Jay";
 }
 
 function updateLiveAge(now) {
   const years = (now.getTime() - BIRTHDAY.getTime()) / (365.2425 * 24 * 60 * 60 * 1000);
-  const daysAlive = Math.floor((now.getTime() - BIRTHDAY.getTime()) / 86400000);
-  const nextBirthday = new Date(now.getFullYear(), BIRTHDAY.getMonth(), BIRTHDAY.getDate(), 22, 5);
-  if (nextBirthday <= now) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
-  const daysUntilBirthday = Math.ceil((nextBirthday.getTime() - now.getTime()) / 86400000);
-  ui.liveAge.textContent = `Age ${years.toFixed(9)} years and counting. ${daysAlive.toLocaleString()} days alive, with ${daysUntilBirthday} days until the next level-up.`;
+  ui.liveAge.textContent = `Age: ${years.toFixed(9)} years`;
+}
+
+function updateProgress(now) {
+  const dayStart = new Date(now);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayProgress = ((now - dayStart) / 86400000) * 100;
+
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+  const nextYearStart = new Date(now.getFullYear() + 1, 0, 1);
+  const yearProgress = ((now - yearStart) / (nextYearStart - yearStart)) * 100;
+
+  ui.dayProgressValue.textContent = `${dayProgress.toFixed(1)}%`;
+  ui.dayProgressBar.style.width = `${Math.min(100, Math.max(0, dayProgress))}%`;
+  ui.yearProgressValue.textContent = `${yearProgress.toFixed(1)}%`;
+  ui.yearProgressBar.style.width = `${Math.min(100, Math.max(0, yearProgress))}%`;
 }
 
 function updateClock() {
@@ -166,6 +149,7 @@ function updateClock() {
   );
   updateGreeting(hour);
   updateLiveAge(now);
+  updateProgress(now);
 }
 
 function applyMode() {
@@ -176,44 +160,6 @@ function applyMode() {
 function applyFocusMode() {
   document.body.classList.toggle("focus-mode", state.focusMode);
   ui.focusToggle.textContent = state.focusMode ? "Exit focus" : "Focus mode";
-}
-
-function applyPreset(preset) {
-  if (!PRESETS[preset]) return;
-  const [start, end] = PRESETS[preset];
-  state.appearance.colorStart = start;
-  state.appearance.colorEnd = end;
-}
-
-function applyAppearance() {
-  document.documentElement.style.setProperty("--bg-start", state.appearance.colorStart);
-  document.documentElement.style.setProperty("--bg-end", state.appearance.colorEnd);
-  document.documentElement.style.setProperty("--motion-scale", String((state.appearance.motionLevel || 0) / 100));
-  document.body.classList.toggle("animated-gradient", state.appearance.mode === "animated-gradient");
-
-  if (state.appearance.mode === "image" && state.appearance.imageUrl) {
-    const safeUrl = state.appearance.imageUrl.replace(/"/g, "%22");
-    document.body.style.backgroundImage = `linear-gradient(120deg, var(--bg-start), var(--bg-end)), url("${safeUrl}")`;
-  } else {
-    document.body.style.backgroundImage = "linear-gradient(120deg, var(--bg-start), var(--bg-end))";
-  }
-
-  if (state.appearance.mode === "anime-video" && state.appearance.videoUrl) {
-    ui.bgVideo.src = state.appearance.videoUrl;
-    document.body.classList.add("has-video");
-  } else {
-    ui.bgVideo.removeAttribute("src");
-    ui.bgVideo.load();
-    document.body.classList.remove("has-video");
-  }
-
-  ui.colorStart.value = state.appearance.colorStart;
-  ui.colorEnd.value = state.appearance.colorEnd;
-  ui.visualPreset.value = state.appearance.preset;
-  ui.motionLevel.value = String(state.appearance.motionLevel);
-  ui.backgroundMode.value = state.appearance.mode;
-  ui.backgroundImage.value = state.appearance.imageUrl;
-  ui.backgroundVideo.value = state.appearance.videoUrl;
 }
 
 function getFallbackIcon(url, name) {
@@ -351,20 +297,6 @@ function runSearch(rawValue) {
   window.location.href = target;
 }
 
-async function loadWeather() {
-  ui.weatherMeta.textContent = "Loading weather...";
-  try {
-    const endpoint = "https://api.open-meteo.com/v1/forecast?latitude=34.05&longitude=-118.24&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto";
-    const data = await fetchEspnJson(endpoint);
-    const current = data.current || {};
-    const temperature = current.temperature_2m ?? "--";
-    const wind = current.wind_speed_10m ?? "--";
-    ui.weatherMeta.textContent = `Los Angeles: ${temperature}°C, wind ${wind} km/h`;
-  } catch {
-    ui.weatherMeta.textContent = "Weather feed unavailable right now.";
-  }
-}
-
 function pickStatus(event) {
   const st = (event.status?.type?.state || "").toLowerCase();
   if (st === "in") return "live";
@@ -381,12 +313,20 @@ function parseEspnEvent(key, league, event) {
   const homeTeam = home.team || {};
   const awayTeam = away.team || {};
   const rec = (teamObj) => teamObj.records?.[0]?.summary || "";
+  const status = event.status || comps.status || {};
+  const statusType = status.type || {};
+  const displayClock = status.displayClock || "";
+  const period = status.period || "";
+  const detail = statusType.shortDetail || statusType.detail || statusType.description || event.status?.type?.detail || "";
   return {
     key,
     league,
     status: pickStatus(event),
     date: event.date,
-    note: event.status?.type?.shortDetail || "",
+    displayClock,
+    period,
+    detail,
+    note: detail,
     home: {
       name: homeTeam.shortDisplayName || homeTeam.displayName || "Home",
       score: home.score || "",
@@ -400,6 +340,30 @@ function parseEspnEvent(key, league, event) {
       logo: awayTeam.logo || ""
     }
   };
+}
+
+function formatLiveDetail(event) {
+  if (event.status !== "live") return event.detail || "";
+  const parts = [];
+  if (event.key === "nba" && event.period) parts.push(`Q${event.period}`);
+  else if (event.key === "f1" && event.period) parts.push(`Lap ${event.period}`);
+  else if (event.key === "soccer" && event.displayClock) parts.push(event.displayClock);
+  else if (event.period) parts.push(`Period ${event.period}`);
+  if (event.key !== "soccer" && event.displayClock) parts.push(event.displayClock);
+  const joined = parts.join(" ");
+  if (joined) return joined;
+  return event.detail || "Live now";
+}
+
+function getStatusLabel(event) {
+  if (event.status === "live") return `LIVE · ${formatLiveDetail(event)}`;
+  if (event.status === "finished") return "FINAL";
+  return event.status.toUpperCase();
+}
+
+function getEventTimeText(event) {
+  if (event.status === "live") return event.detail || formatLiveDetail(event);
+  return new Date(event.date).toLocaleString([], { timeZone: getClockTimeZone() });
 }
 
 async function fetchEspnJson(url) {
@@ -509,14 +473,14 @@ function renderSportsCards(events) {
       card.innerHTML = `
         <div class="sport-head">
           <span class="sport-league">${event.league}</span>
-          <span class="sport-status ${event.status}">${event.status.toUpperCase()}</span>
+          <span class="sport-status ${event.status}">${getStatusLabel(event)}</span>
         </div>
         <div class="sport-match">
           ${renderTeamRow(event.away)}
           ${renderTeamRow(event.home)}
         </div>
-        <p class="sport-time">${new Date(event.date).toLocaleString([], { timeZone: getClockTimeZone() })}</p>
-        <p class="sport-extra">${event.note || ""}</p>
+        <p class="sport-time">${getEventTimeText(event)}</p>
+        <p class="sport-extra">${event.status === "live" ? "Live game detail updates with the feed." : event.note || ""}</p>
       `;
       ui.sportsCards.appendChild(card);
     });
@@ -594,30 +558,6 @@ function setupEvents() {
     state.calendarDate = new Date(state.calendarDate.getFullYear(), state.calendarDate.getMonth() + 1, 1);
     renderCalendar();
   });
-  ui.saveAppearance.addEventListener("click", () => {
-    state.appearance.colorStart = ui.colorStart.value;
-    state.appearance.colorEnd = ui.colorEnd.value;
-    state.appearance.preset = ui.visualPreset.value;
-    state.appearance.motionLevel = Number(ui.motionLevel.value);
-    state.appearance.mode = ui.backgroundMode.value;
-    state.appearance.imageUrl = ui.backgroundImage.value.trim();
-    state.appearance.videoUrl = ui.backgroundVideo.value.trim();
-    persistState();
-    applyAppearance();
-  });
-  ui.visualPreset.addEventListener("change", () => {
-    state.appearance.preset = ui.visualPreset.value;
-    applyPreset(state.appearance.preset);
-    applyAppearance();
-  });
-  ui.clearImage.addEventListener("click", () => {
-    state.appearance.imageUrl = "";
-    state.appearance.videoUrl = "";
-    ui.backgroundImage.value = "";
-    ui.backgroundVideo.value = "";
-    persistState();
-    applyAppearance();
-  });
   ui.toggleNba.addEventListener("change", () => {
     state.sports.showNba = ui.toggleNba.checked;
     persistState();
@@ -636,9 +576,6 @@ function setupEvents() {
   ui.refreshSports.addEventListener("click", () => {
     loadSports();
   });
-  ui.refreshWeather.addEventListener("click", () => {
-    loadWeather();
-  });
 }
 
 function hydrateUiState() {
@@ -650,16 +587,13 @@ function hydrateUiState() {
 
 function init() {
   loadState();
-  if (PRESETS[state.appearance.preset]) applyPreset(state.appearance.preset);
   hydrateUiState();
   updateClock();
   setInterval(updateClock, 1000);
   applyMode();
   applyFocusMode();
-  applyAppearance();
   renderApps();
   renderCalendar();
-  loadWeather();
   loadSports();
   setupEvents();
   persistState();

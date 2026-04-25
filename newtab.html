@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Focus Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="background-overlay"></div>
+    <main class="dashboard">
+      <header class="topbar card">
+        <div>
+          <h1>Focus Dashboard</h1>
+          <p class="muted">A calm place to start your browsing</p>
+        </div>
+        <button id="modeToggle" class="button" type="button" aria-label="Toggle light or dark mode">
+          Toggle theme
+        </button>
+      </header>
+
+      <section class="clock card" aria-label="Clock and date">
+        <p id="clock" class="clock-time">--:--:--</p>
+        <p id="date" class="clock-date">---</p>
+      </section>
+
+      <section class="grid">
+        <section class="card">
+          <h2>Todo List</h2>
+          <form id="todoForm" class="todo-form">
+            <input id="todoInput" type="text" maxlength="120" placeholder="Add a task..." required />
+            <button class="button" type="submit">Add</button>
+          </form>
+          <ul id="todoList" class="todo-list" aria-live="polite"></ul>
+        </section>
+
+        <section class="card">
+          <h2>Quick Links</h2>
+          <form id="linkForm" class="todo-form">
+            <input id="linkName" type="text" maxlength="40" placeholder="Name" required />
+            <input id="linkUrl" type="url" placeholder="https://example.com" required />
+            <button class="button" type="submit">Add link</button>
+          </form>
+          <ul id="quickLinks" class="links-list"></ul>
+        </section>
+      </section>
+
+      <section class="card">
+        <h2>Appearance</h2>
+        <div class="appearance-grid">
+          <label>
+            Gradient start
+            <input id="colorStart" type="color" value="#1d4ed8" />
+          </label>
+          <label>
+            Gradient end
+            <input id="colorEnd" type="color" value="#9333ea" />
+          </label>
+          <label class="wide">
+            Background image URL
+            <input id="backgroundImage" type="url" placeholder="https://images.example.com/photo.jpg" />
+          </label>
+        </div>
+        <div class="actions">
+          <button id="saveAppearance" class="button" type="button">Save appearance</button>
+          <button id="clearImage" class="button button-secondary" type="button">Use gradient only</button>
+        </div>
+      </section>
+    </main>
+
+    <template id="todoItemTemplate">
+      <li class="todo-item">
+        <label>
+          <input class="todo-check" type="checkbox" />
+          <span class="todo-text"></span>
+        </label>
+        <button class="button button-small button-secondary todo-delete" type="button">Delete</button>
+      </li>
+    </template>
+
+    <template id="linkItemTemplate">
+      <li class="link-item">
+        <a class="link-anchor" target="_blank" rel="noopener noreferrer"></a>
+        <button class="button button-small button-secondary link-delete" type="button">Remove</button>
+      </li>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>

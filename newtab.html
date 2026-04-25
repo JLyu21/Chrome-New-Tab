@@ -9,62 +9,73 @@
   <body>
     <div class="background-overlay"></div>
     <main class="dashboard">
-      <header class="topbar card">
+      <header class="hero card">
         <div>
+          <p id="greeting" class="eyebrow">Good day</p>
           <h1>Focus Dashboard</h1>
-          <p class="muted">A calm place to start your browsing</p>
+          <p class="muted">Everything you need, one new tab away.</p>
         </div>
-        <button id="modeToggle" class="button" type="button" aria-label="Toggle light or dark mode">
-          Toggle theme
-        </button>
+        <div class="hero-right">
+          <p id="clock" class="clock-time">--:--:--</p>
+          <p id="date" class="clock-date">---</p>
+          <button id="modeToggle" class="button" type="button" aria-label="Toggle light or dark mode">
+            Toggle theme
+          </button>
+        </div>
       </header>
 
-      <section class="clock card" aria-label="Clock and date">
-        <p id="clock" class="clock-time">--:--:--</p>
-        <p id="date" class="clock-date">---</p>
-      </section>
+      <section class="content-grid">
+        <section class="left-column">
+          <section class="card pane">
+            <div class="pane-title">
+              <h2>Quick Links</h2>
+              <span class="muted">Jump faster</span>
+            </div>
+            <form id="linkForm" class="form-grid">
+              <input id="linkName" type="text" maxlength="40" placeholder="Name" required />
+              <input id="linkUrl" type="url" placeholder="https://example.com" required />
+              <button class="button" type="submit">Add link</button>
+            </form>
+            <ul id="quickLinks" class="links-list"></ul>
+          </section>
 
-      <section class="grid">
-        <section class="card">
-          <h2>Todo List</h2>
-          <form id="todoForm" class="todo-form">
+          <section class="card pane">
+            <div class="pane-title">
+              <h2>Appearance</h2>
+              <span class="muted">Make it yours</span>
+            </div>
+            <div class="appearance-grid">
+              <label>
+                Gradient start
+                <input id="colorStart" type="color" value="#1d4ed8" />
+              </label>
+              <label>
+                Gradient end
+                <input id="colorEnd" type="color" value="#9333ea" />
+              </label>
+              <label class="wide">
+                Background image URL
+                <input id="backgroundImage" type="url" placeholder="https://images.example.com/photo.jpg" />
+              </label>
+            </div>
+            <div class="actions">
+              <button id="saveAppearance" class="button" type="button">Save appearance</button>
+              <button id="clearImage" class="button button-secondary" type="button">Use gradient only</button>
+            </div>
+          </section>
+        </section>
+
+        <section class="card pane right-column">
+          <div class="pane-title">
+            <h2>Todo List</h2>
+            <span class="muted">Stay on track</span>
+          </div>
+          <form id="todoForm" class="form-grid form-todo">
             <input id="todoInput" type="text" maxlength="120" placeholder="Add a task..." required />
             <button class="button" type="submit">Add</button>
           </form>
           <ul id="todoList" class="todo-list" aria-live="polite"></ul>
         </section>
-
-        <section class="card">
-          <h2>Quick Links</h2>
-          <form id="linkForm" class="todo-form">
-            <input id="linkName" type="text" maxlength="40" placeholder="Name" required />
-            <input id="linkUrl" type="url" placeholder="https://example.com" required />
-            <button class="button" type="submit">Add link</button>
-          </form>
-          <ul id="quickLinks" class="links-list"></ul>
-        </section>
-      </section>
-
-      <section class="card">
-        <h2>Appearance</h2>
-        <div class="appearance-grid">
-          <label>
-            Gradient start
-            <input id="colorStart" type="color" value="#1d4ed8" />
-          </label>
-          <label>
-            Gradient end
-            <input id="colorEnd" type="color" value="#9333ea" />
-          </label>
-          <label class="wide">
-            Background image URL
-            <input id="backgroundImage" type="url" placeholder="https://images.example.com/photo.jpg" />
-          </label>
-        </div>
-        <div class="actions">
-          <button id="saveAppearance" class="button" type="button">Save appearance</button>
-          <button id="clearImage" class="button button-secondary" type="button">Use gradient only</button>
-        </div>
       </section>
     </main>
 
@@ -80,7 +91,13 @@
 
     <template id="linkItemTemplate">
       <li class="link-item">
-        <a class="link-anchor" target="_blank" rel="noopener noreferrer"></a>
+        <a class="link-anchor" target="_blank" rel="noopener noreferrer">
+          <span class="link-icon" aria-hidden="true"></span>
+          <span class="link-meta">
+            <span class="link-name"></span>
+            <span class="link-url"></span>
+          </span>
+        </a>
         <button class="button button-small button-secondary link-delete" type="button">Remove</button>
       </li>
     </template>

@@ -26,6 +26,7 @@ const state = {
 };
 
 const ui = {
+  greeting: document.getElementById("greeting"),
   clock: document.getElementById("clock"),
   date: document.getElementById("date"),
   todoForm: document.getElementById("todoForm"),
@@ -83,10 +84,24 @@ function updateClock() {
     month: "long",
     day: "numeric"
   });
+  updateGreeting(now.getHours());
+}
+
+function updateGreeting(hour) {
+  if (hour < 12) {
+    ui.greeting.textContent = "Good morning";
+    return;
+  }
+  if (hour < 18) {
+    ui.greeting.textContent = "Good afternoon";
+    return;
+  }
+  ui.greeting.textContent = "Good evening";
 }
 
 function applyMode() {
   document.body.classList.toggle("dark", state.mode === "dark");
+  ui.modeToggle.textContent = state.mode === "dark" ? "Switch to light" : "Switch to dark";
 }
 
 function applyAppearance() {
@@ -141,11 +156,22 @@ function renderLinks() {
   state.links.forEach((link) => {
     const fragment = ui.linkTemplate.content.cloneNode(true);
     const anchor = fragment.querySelector(".link-anchor");
+    const icon = fragment.querySelector(".link-icon");
+    const name = fragment.querySelector(".link-name");
+    const url = fragment.querySelector(".link-url");
     const removeButton = fragment.querySelector(".link-delete");
+    let host = link.url;
+    try {
+      host = new URL(link.url).hostname.replace(/^www\./, "");
+    } catch {
+      host = link.url;
+    }
 
-    anchor.textContent = link.name;
     anchor.href = link.url;
     anchor.title = link.url;
+    icon.textContent = link.name.charAt(0).toUpperCase();
+    name.textContent = link.name;
+    url.textContent = host;
 
     removeButton.addEventListener("click", () => {
       state.links = state.links.filter((itemLink) => itemLink.id !== link.id);

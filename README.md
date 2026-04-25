@@ -4,9 +4,12 @@ A plain HTML/CSS/JavaScript new tab browser extension for Chrome (MV3), with:
 
 - Custom new tab dashboard UI
 - Live clock and date
-- Todo list persisted in `localStorage`
-- Quick links with add/remove
-- Custom gradient colors and optional background image URL
+- Calendar in the header cluster
+- Google search and URL launching
+- App shortcuts persisted in `localStorage`
+- Sports scoreboard cards
+- Weather summary
+- Custom colors, motion, image backgrounds, and optional video backgrounds
 - Light/dark mode toggle
 
 ## Files

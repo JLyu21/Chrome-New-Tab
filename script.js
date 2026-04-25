@@ -1,49 +1,96 @@
 const STORAGE_KEYS = {
-  todos: "focus_newtab_todos",
-  links: "focus_newtab_links",
-  appearance: "focus_newtab_appearance",
-  mode: "focus_newtab_mode"
+  apps: "jay_newtab_apps",
+  appearance: "jay_newtab_appearance",
+  mode: "jay_newtab_mode",
+  focus: "jay_newtab_focus_mode",
+  sports: "jay_newtab_sports_preferences",
+  timeZone: "jay_newtab_timezone"
+};
+
+const PRESETS = {
+  "neo-night": ["#0f172a", "#7c3aed"],
+  "sunset-pulse": ["#be123c", "#7c2d12"],
+  aurora: ["#0f766e", "#1d4ed8"],
+  "mono-glass": ["#1f2937", "#111827"]
 };
 
 const defaults = {
-  links: [
-    { id: crypto.randomUUID(), name: "Gmail", url: "https://mail.google.com" },
-    { id: crypto.randomUUID(), name: "YouTube", url: "https://www.youtube.com" },
-    { id: crypto.randomUUID(), name: "GitHub", url: "https://github.com" }
+  apps: [
+    { id: crypto.randomUUID(), name: "ChatGPT", url: "https://chatgpt.com", iconUrl: "" },
+    { id: crypto.randomUUID(), name: "Google Drive", url: "https://drive.google.com", iconUrl: "" },
+    { id: crypto.randomUUID(), name: "FMHY", url: "https://fmhy.net", iconUrl: "" },
+    { id: crypto.randomUUID(), name: "Netease", url: "https://music.163.com/#/", iconUrl: "" },
+    { id: crypto.randomUUID(), name: "YouTube", url: "https://youtube.com", iconUrl: "" }
   ],
   appearance: {
-    colorStart: "#1d4ed8",
-    colorEnd: "#9333ea",
-    imageUrl: ""
-  }
+    colorStart: "#0f172a",
+    colorEnd: "#7c3aed",
+    mode: "animated-gradient",
+    imageUrl: "",
+    videoUrl: "",
+    preset: "neo-night",
+    motionLevel: 65
+  },
+  sports: {
+    showNba: true,
+    showSoccer: true,
+    showF1: true
+  },
+  timeZone: "system"
 };
 
 const state = {
-  todos: [],
-  links: [],
+  apps: [],
   appearance: { ...defaults.appearance },
-  mode: "light"
+  mode: "dark",
+  focusMode: false,
+  sports: { ...defaults.sports },
+  timeZone: defaults.timeZone,
+  calendarDate: new Date()
 };
+
+const BIRTHDAY = new Date("2006-12-20T22:05:00");
 
 const ui = {
   greeting: document.getElementById("greeting"),
+  heroTitle: document.getElementById("heroTitle"),
+  liveAge: document.getElementById("liveAge"),
+  searchForm: document.getElementById("searchForm"),
+  searchInput: document.getElementById("searchInput"),
   clock: document.getElementById("clock"),
   date: document.getElementById("date"),
-  todoForm: document.getElementById("todoForm"),
-  todoInput: document.getElementById("todoInput"),
-  todoList: document.getElementById("todoList"),
-  linkForm: document.getElementById("linkForm"),
-  linkName: document.getElementById("linkName"),
-  linkUrl: document.getElementById("linkUrl"),
-  quickLinks: document.getElementById("quickLinks"),
+  timeZoneSelect: document.getElementById("timeZoneSelect"),
+  modeToggle: document.getElementById("modeToggle"),
+  focusToggle: document.getElementById("focusToggle"),
+  appFormToggle: document.getElementById("appFormToggle"),
+  appForm: document.getElementById("appForm"),
+  appName: document.getElementById("appName"),
+  appUrl: document.getElementById("appUrl"),
+  appIcon: document.getElementById("appIcon"),
+  appGrid: document.getElementById("appGrid"),
+  appTemplate: document.getElementById("appItemTemplate"),
+  prevMonth: document.getElementById("prevMonth"),
+  nextMonth: document.getElementById("nextMonth"),
+  calendarLabel: document.getElementById("calendarLabel"),
+  calendarGrid: document.getElementById("calendarGrid"),
+  refreshWeather: document.getElementById("refreshWeather"),
+  weatherMeta: document.getElementById("weatherMeta"),
   colorStart: document.getElementById("colorStart"),
   colorEnd: document.getElementById("colorEnd"),
+  visualPreset: document.getElementById("visualPreset"),
+  motionLevel: document.getElementById("motionLevel"),
+  backgroundMode: document.getElementById("backgroundMode"),
   backgroundImage: document.getElementById("backgroundImage"),
+  backgroundVideo: document.getElementById("backgroundVideo"),
   saveAppearance: document.getElementById("saveAppearance"),
   clearImage: document.getElementById("clearImage"),
-  modeToggle: document.getElementById("modeToggle"),
-  todoTemplate: document.getElementById("todoItemTemplate"),
-  linkTemplate: document.getElementById("linkItemTemplate")
+  bgVideo: document.getElementById("bgVideo"),
+  toggleNba: document.getElementById("toggleNba"),
+  toggleSoccer: document.getElementById("toggleSoccer"),
+  toggleF1: document.getElementById("toggleF1"),
+  refreshSports: document.getElementById("refreshSports"),
+  sportsMeta: document.getElementById("sportsMeta"),
+  sportsCards: document.getElementById("sportsCards")
 };
 
 function safeParse(raw, fallback) {
@@ -54,211 +101,566 @@ function safeParse(raw, fallback) {
   }
 }
 
+function normalizeUrl(url) {
+  if (/^https?:\/\//i.test(url)) return url;
+  return `https://${url}`;
+}
+
+function getClockTimeZone() {
+  return state.timeZone === "system" ? undefined : state.timeZone;
+}
+
 function loadState() {
-  state.todos = safeParse(localStorage.getItem(STORAGE_KEYS.todos), []);
-  state.links = safeParse(localStorage.getItem(STORAGE_KEYS.links), defaults.links);
-  state.appearance = {
-    ...defaults.appearance,
-    ...safeParse(localStorage.getItem(STORAGE_KEYS.appearance), {})
-  };
-  state.mode = localStorage.getItem(STORAGE_KEYS.mode) || "light";
+  state.apps = safeParse(localStorage.getItem(STORAGE_KEYS.apps), defaults.apps);
+  state.appearance = { ...defaults.appearance, ...safeParse(localStorage.getItem(STORAGE_KEYS.appearance), {}) };
+  state.mode = localStorage.getItem(STORAGE_KEYS.mode) || "dark";
+  state.focusMode = localStorage.getItem(STORAGE_KEYS.focus) === "true";
+  state.sports = { ...defaults.sports, ...safeParse(localStorage.getItem(STORAGE_KEYS.sports), {}) };
+  state.timeZone = localStorage.getItem(STORAGE_KEYS.timeZone) || defaults.timeZone;
 }
 
 function persistState() {
-  localStorage.setItem(STORAGE_KEYS.todos, JSON.stringify(state.todos));
-  localStorage.setItem(STORAGE_KEYS.links, JSON.stringify(state.links));
+  localStorage.setItem(STORAGE_KEYS.apps, JSON.stringify(state.apps));
   localStorage.setItem(STORAGE_KEYS.appearance, JSON.stringify(state.appearance));
   localStorage.setItem(STORAGE_KEYS.mode, state.mode);
-}
-
-function updateClock() {
-  const now = new Date();
-  ui.clock.textContent = now.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  });
-  ui.date.textContent = now.toLocaleDateString([], {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  });
-  updateGreeting(now.getHours());
+  localStorage.setItem(STORAGE_KEYS.focus, String(state.focusMode));
+  localStorage.setItem(STORAGE_KEYS.sports, JSON.stringify(state.sports));
+  localStorage.setItem(STORAGE_KEYS.timeZone, state.timeZone);
 }
 
 function updateGreeting(hour) {
-  if (hour < 12) {
-    ui.greeting.textContent = "Good morning";
-    return;
-  }
-  if (hour < 18) {
-    ui.greeting.textContent = "Good afternoon";
-    return;
-  }
-  ui.greeting.textContent = "Good evening";
+  let message = "Good evening";
+  if (hour < 12) message = "Good morning";
+  else if (hour < 18) message = "Good afternoon";
+  ui.greeting.textContent = `${message}, Jay`;
+  ui.heroTitle.textContent = "Jay's Launch Deck";
+}
+
+function updateLiveAge(now) {
+  const years = (now.getTime() - BIRTHDAY.getTime()) / (365.2425 * 24 * 60 * 60 * 1000);
+  const daysAlive = Math.floor((now.getTime() - BIRTHDAY.getTime()) / 86400000);
+  const nextBirthday = new Date(now.getFullYear(), BIRTHDAY.getMonth(), BIRTHDAY.getDate(), 22, 5);
+  if (nextBirthday <= now) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+  const daysUntilBirthday = Math.ceil((nextBirthday.getTime() - now.getTime()) / 86400000);
+  ui.liveAge.textContent = `Age ${years.toFixed(9)} years and counting. ${daysAlive.toLocaleString()} days alive, with ${daysUntilBirthday} days until the next level-up.`;
+}
+
+function updateClock() {
+  const tz = getClockTimeZone();
+  const now = new Date();
+  ui.clock.textContent = new Intl.DateTimeFormat([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZone: tz
+  }).format(now);
+  ui.date.textContent = new Intl.DateTimeFormat([], {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: tz
+  }).format(now);
+  const hour = Number(
+    new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: false, timeZone: tz }).format(now)
+  );
+  updateGreeting(hour);
+  updateLiveAge(now);
 }
 
 function applyMode() {
-  document.body.classList.toggle("dark", state.mode === "dark");
+  document.body.classList.toggle("light", state.mode === "light");
   ui.modeToggle.textContent = state.mode === "dark" ? "Switch to light" : "Switch to dark";
+}
+
+function applyFocusMode() {
+  document.body.classList.toggle("focus-mode", state.focusMode);
+  ui.focusToggle.textContent = state.focusMode ? "Exit focus" : "Focus mode";
+}
+
+function applyPreset(preset) {
+  if (!PRESETS[preset]) return;
+  const [start, end] = PRESETS[preset];
+  state.appearance.colorStart = start;
+  state.appearance.colorEnd = end;
 }
 
 function applyAppearance() {
   document.documentElement.style.setProperty("--bg-start", state.appearance.colorStart);
   document.documentElement.style.setProperty("--bg-end", state.appearance.colorEnd);
+  document.documentElement.style.setProperty("--motion-scale", String((state.appearance.motionLevel || 0) / 100));
+  document.body.classList.toggle("animated-gradient", state.appearance.mode === "animated-gradient");
 
-  if (state.appearance.imageUrl) {
-    const encodedUrl = state.appearance.imageUrl.replace(/"/g, "%22");
-    document.body.style.backgroundImage = `linear-gradient(145deg, var(--bg-start), var(--bg-end)), url("${encodedUrl}")`;
+  if (state.appearance.mode === "image" && state.appearance.imageUrl) {
+    const safeUrl = state.appearance.imageUrl.replace(/"/g, "%22");
+    document.body.style.backgroundImage = `linear-gradient(120deg, var(--bg-start), var(--bg-end)), url("${safeUrl}")`;
   } else {
-    document.body.style.backgroundImage = "linear-gradient(145deg, var(--bg-start), var(--bg-end))";
+    document.body.style.backgroundImage = "linear-gradient(120deg, var(--bg-start), var(--bg-end))";
+  }
+
+  if (state.appearance.mode === "anime-video" && state.appearance.videoUrl) {
+    ui.bgVideo.src = state.appearance.videoUrl;
+    document.body.classList.add("has-video");
+  } else {
+    ui.bgVideo.removeAttribute("src");
+    ui.bgVideo.load();
+    document.body.classList.remove("has-video");
   }
 
   ui.colorStart.value = state.appearance.colorStart;
   ui.colorEnd.value = state.appearance.colorEnd;
+  ui.visualPreset.value = state.appearance.preset;
+  ui.motionLevel.value = String(state.appearance.motionLevel);
+  ui.backgroundMode.value = state.appearance.mode;
   ui.backgroundImage.value = state.appearance.imageUrl;
+  ui.backgroundVideo.value = state.appearance.videoUrl;
 }
 
-function renderTodos() {
-  ui.todoList.innerHTML = "";
-
-  state.todos.forEach((todo) => {
-    const fragment = ui.todoTemplate.content.cloneNode(true);
-    const item = fragment.querySelector(".todo-item");
-    const checkbox = fragment.querySelector(".todo-check");
-    const text = fragment.querySelector(".todo-text");
-    const removeButton = fragment.querySelector(".todo-delete");
-
-    checkbox.checked = todo.done;
-    text.textContent = todo.text;
-    item.classList.toggle("completed", Boolean(todo.done));
-
-    checkbox.addEventListener("change", () => {
-      todo.done = checkbox.checked;
-      persistState();
-      renderTodos();
-    });
-
-    removeButton.addEventListener("click", () => {
-      state.todos = state.todos.filter((itemTodo) => itemTodo.id !== todo.id);
-      persistState();
-      renderTodos();
-    });
-
-    ui.todoList.appendChild(fragment);
-  });
-}
-
-function renderLinks() {
-  ui.quickLinks.innerHTML = "";
-
-  state.links.forEach((link) => {
-    const fragment = ui.linkTemplate.content.cloneNode(true);
-    const anchor = fragment.querySelector(".link-anchor");
-    const icon = fragment.querySelector(".link-icon");
-    const name = fragment.querySelector(".link-name");
-    const url = fragment.querySelector(".link-url");
-    const removeButton = fragment.querySelector(".link-delete");
-    let host = link.url;
-    try {
-      host = new URL(link.url).hostname.replace(/^www\./, "");
-    } catch {
-      host = link.url;
-    }
-
-    anchor.href = link.url;
-    anchor.title = link.url;
-    icon.textContent = link.name.charAt(0).toUpperCase();
-    name.textContent = link.name;
-    url.textContent = host;
-
-    removeButton.addEventListener("click", () => {
-      state.links = state.links.filter((itemLink) => itemLink.id !== link.id);
-      persistState();
-      renderLinks();
-    });
-
-    ui.quickLinks.appendChild(fragment);
-  });
-}
-
-function normalizeUrl(url) {
-  if (/^https?:\/\//i.test(url)) {
-    return url;
+function getFallbackIcon(url, name) {
+  try {
+    const host = new URL(url).hostname;
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`;
+  } catch {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=128&background=334155&color=fff`;
   }
-  return `https://${url}`;
+}
+
+function renderApps() {
+  ui.appGrid.innerHTML = "";
+  state.apps.forEach((app) => {
+    const fragment = ui.appTemplate.content.cloneNode(true);
+    const link = fragment.querySelector(".app-link");
+    const logo = fragment.querySelector(".app-logo");
+    const name = fragment.querySelector(".app-name");
+    const remove = fragment.querySelector(".app-delete");
+    link.href = app.url;
+    link.title = app.url;
+    logo.src = app.iconUrl || getFallbackIcon(app.url, app.name);
+    logo.alt = `${app.name} icon`;
+    name.textContent = app.name;
+    remove.addEventListener("click", () => {
+      state.apps = state.apps.filter((item) => item.id !== app.id);
+      persistState();
+      renderApps();
+    });
+    ui.appGrid.appendChild(fragment);
+  });
+}
+
+function setAppFormOpen(isOpen) {
+  ui.appForm.hidden = !isOpen;
+  ui.appFormToggle.setAttribute("aria-expanded", String(isOpen));
+  ui.appFormToggle.textContent = isOpen ? "Hide fields" : "Add shortcut";
+  if (isOpen) ui.appName.focus();
+}
+
+function renderCalendar() {
+  const current = state.calendarDate;
+  const year = current.getFullYear();
+  const month = current.getMonth();
+  const first = new Date(year, month, 1);
+  const startDay = first.getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  ui.calendarLabel.textContent = current.toLocaleDateString([], { month: "long", year: "numeric" });
+  ui.calendarGrid.innerHTML = "";
+  dayNames.forEach((day) => {
+    const el = document.createElement("div");
+    el.className = "calendar-cell day-name";
+    el.textContent = day;
+    ui.calendarGrid.appendChild(el);
+  });
+  for (let i = 0; i < startDay; i += 1) {
+    const empty = document.createElement("div");
+    empty.className = "calendar-cell muted-day";
+    ui.calendarGrid.appendChild(empty);
+  }
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const cell = document.createElement("div");
+    cell.className = "calendar-cell";
+    cell.textContent = String(day);
+    if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) cell.classList.add("today");
+    ui.calendarGrid.appendChild(cell);
+  }
+}
+
+function isoNowAddHours(hours) {
+  return new Date(Date.now() + hours * 3600000).toISOString();
+}
+
+function getFallbackSportsData() {
+  return [
+    {
+      key: "nba",
+      league: "NBA",
+      status: "upcoming",
+      date: isoNowAddHours(2),
+      home: { name: "Lakers", score: "", record: "44-31", logo: "https://a.espncdn.com/i/teamlogos/nba/500/lal.png" },
+      away: { name: "Warriors", score: "", record: "42-33", logo: "https://a.espncdn.com/i/teamlogos/nba/500/gs.png" }
+    },
+    {
+      key: "nba",
+      league: "NBA",
+      status: "upcoming",
+      date: isoNowAddHours(18),
+      home: { name: "Celtics", score: "", record: "58-20", logo: "https://a.espncdn.com/i/teamlogos/nba/500/bos.png" },
+      away: { name: "Bucks", score: "", record: "47-31", logo: "https://a.espncdn.com/i/teamlogos/nba/500/mil.png" }
+    },
+    {
+      key: "nba",
+      league: "NBA",
+      status: "upcoming",
+      date: isoNowAddHours(26),
+      home: { name: "Suns", score: "", record: "46-32", logo: "https://a.espncdn.com/i/teamlogos/nba/500/phx.png" },
+      away: { name: "Nuggets", score: "", record: "52-27", logo: "https://a.espncdn.com/i/teamlogos/nba/500/den.png" }
+    },
+    {
+      key: "soccer",
+      league: "Champions League",
+      status: "upcoming",
+      date: isoNowAddHours(18),
+      home: { name: "Real Madrid", score: "", record: "", logo: "https://a.espncdn.com/i/teamlogos/soccer/500/86.png" },
+      away: { name: "Bayern", score: "", record: "", logo: "https://a.espncdn.com/i/teamlogos/soccer/500/132.png" }
+    },
+    {
+      key: "f1",
+      league: "Formula 1",
+      status: "finished",
+      date: isoNowAddHours(-8),
+      home: { name: "Max Verstappen", score: "1", record: "", logo: "https://a.espncdn.com/i/teamlogos/racing/500/f1.png" },
+      away: { name: "Lando Norris", score: "2", record: "", logo: "https://a.espncdn.com/i/teamlogos/racing/500/f1.png" },
+      note: "Race result"
+    }
+  ];
+}
+
+function looksLikeUrl(value) {
+  return /^[a-zA-Z]+:\/\//.test(value) || /^www\./.test(value);
+}
+
+function runSearch(rawValue) {
+  const value = rawValue.trim();
+  if (!value) return;
+  let target = "";
+  if (looksLikeUrl(value)) {
+    target = normalizeUrl(value);
+  } else {
+    target = `https://www.google.com/search?q=${encodeURIComponent(value)}`;
+  }
+  window.location.href = target;
+}
+
+async function loadWeather() {
+  ui.weatherMeta.textContent = "Loading weather...";
+  try {
+    const endpoint = "https://api.open-meteo.com/v1/forecast?latitude=34.05&longitude=-118.24&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto";
+    const data = await fetchEspnJson(endpoint);
+    const current = data.current || {};
+    const temperature = current.temperature_2m ?? "--";
+    const wind = current.wind_speed_10m ?? "--";
+    ui.weatherMeta.textContent = `Los Angeles: ${temperature}°C, wind ${wind} km/h`;
+  } catch {
+    ui.weatherMeta.textContent = "Weather feed unavailable right now.";
+  }
+}
+
+function pickStatus(event) {
+  const st = (event.status?.type?.state || "").toLowerCase();
+  if (st === "in") return "live";
+  if (st === "post") return "finished";
+  return "upcoming";
+}
+
+function parseEspnEvent(key, league, event) {
+  const comps = event.competitions?.[0];
+  const competitors = comps?.competitors || [];
+  const home = competitors.find((c) => c.homeAway === "home") || competitors[0];
+  const away = competitors.find((c) => c.homeAway === "away") || competitors[1];
+  if (!home || !away) return null;
+  const homeTeam = home.team || {};
+  const awayTeam = away.team || {};
+  const rec = (teamObj) => teamObj.records?.[0]?.summary || "";
+  return {
+    key,
+    league,
+    status: pickStatus(event),
+    date: event.date,
+    note: event.status?.type?.shortDetail || "",
+    home: {
+      name: homeTeam.shortDisplayName || homeTeam.displayName || "Home",
+      score: home.score || "",
+      record: rec(home),
+      logo: homeTeam.logo || ""
+    },
+    away: {
+      name: awayTeam.shortDisplayName || awayTeam.displayName || "Away",
+      score: away.score || "",
+      record: rec(away),
+      logo: awayTeam.logo || ""
+    }
+  };
+}
+
+async function fetchEspnJson(url) {
+  const response = await fetch(url, { method: "GET" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}
+
+async function fetchSportsEvents() {
+  const tasks = [];
+  if (state.sports.showNba) {
+    tasks.push(
+      fetchEspnJson("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard")
+        .then((data) => (data.events || []).map((e) => parseEspnEvent("nba", "NBA", e)).filter(Boolean))
+    );
+    const dateOffsetTargets = [1, 2, 3];
+    dateOffsetTargets.forEach((offsetDays) => {
+      const target = new Date();
+      target.setDate(target.getDate() + offsetDays);
+      const dateStr = `${target.getFullYear()}${String(target.getMonth() + 1).padStart(2, "0")}${String(target.getDate()).padStart(2, "0")}`;
+      tasks.push(
+        fetchEspnJson(`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=${dateStr}`)
+          .then((data) => (data.events || []).map((e) => parseEspnEvent("nba", "NBA", e)).filter(Boolean))
+      );
+    });
+  }
+  if (state.sports.showSoccer) {
+    const leagues = [
+      ["eng.1", "Premier League"],
+      ["esp.1", "LaLiga"],
+      ["ger.1", "Bundesliga"],
+      ["ita.1", "Serie A"],
+      ["fra.1", "Ligue 1"],
+      ["uefa.champions", "Champions League"]
+    ];
+    leagues.forEach(([code, name]) => {
+      tasks.push(fetchEspnJson(`https://site.api.espn.com/apis/site/v2/sports/soccer/${code}/scoreboard`)
+        .then((data) => (data.events || []).map((e) => parseEspnEvent("soccer", name, e)).filter(Boolean)));
+    });
+  }
+  if (state.sports.showF1) {
+    tasks.push(fetchEspnJson("https://site.api.espn.com/apis/site/v2/sports/racing/f1/scoreboard")
+      .then((data) => (data.events || []).map((e) => parseEspnEvent("f1", "Formula 1", e)).filter(Boolean)));
+  }
+  const settled = await Promise.allSettled(tasks);
+  const events = settled
+    .filter((item) => item.status === "fulfilled")
+    .flatMap((item) => item.value);
+  const unique = new Map();
+  events.forEach((event) => {
+    const key = `${event.league}-${event.home.name}-${event.away.name}-${event.date}`;
+    unique.set(key, event);
+  });
+  return Array.from(unique.values());
+}
+
+function eventSortValue(status) {
+  if (status === "live") return 0;
+  if (status === "upcoming") return 1;
+  return 2;
+}
+
+function renderTeamRow(team) {
+  return `
+    <div class="team-row">
+      <img class="team-logo" src="${team.logo || "https://www.google.com/s2/favicons?domain=espn.com&sz=128"}" alt="${team.name}" />
+      <div class="team-main">
+        <span class="team-name">${team.name}</span>
+        <span class="team-record">${team.record || "&nbsp;"}</span>
+      </div>
+      <span class="team-score">${team.score || "-"}</span>
+    </div>
+  `;
+}
+
+function renderSportsCards(events) {
+  ui.sportsCards.innerHTML = "";
+  if (!events.length) {
+    const empty = document.createElement("p");
+    empty.className = "muted";
+    empty.textContent = "No events found for selected sports.";
+    ui.sportsCards.appendChild(empty);
+    return;
+  }
+  const groups = {
+    live: events.filter((e) => e.status === "live"),
+    upcoming: events.filter((e) => e.status === "upcoming"),
+    finished: events.filter((e) => e.status === "finished")
+  };
+  ["live", "upcoming", "finished"].forEach((groupKey) => {
+    if (!groups[groupKey].length) return;
+    const title = document.createElement("p");
+    title.className = "sport-group-title";
+    title.textContent = groupKey;
+    ui.sportsCards.appendChild(title);
+    const groupEvents = groups[groupKey].sort((a, b) => {
+      if (groupKey === "upcoming" && a.key !== b.key) {
+        if (a.key === "nba") return -1;
+        if (b.key === "nba") return 1;
+      }
+      return new Date(a.date) - new Date(b.date);
+    });
+    const maxItems = groupKey === "upcoming" ? 8 : 5;
+    groupEvents.slice(0, maxItems).forEach((event) => {
+      const card = document.createElement("article");
+      card.className = "sport-card";
+      card.innerHTML = `
+        <div class="sport-head">
+          <span class="sport-league">${event.league}</span>
+          <span class="sport-status ${event.status}">${event.status.toUpperCase()}</span>
+        </div>
+        <div class="sport-match">
+          ${renderTeamRow(event.away)}
+          ${renderTeamRow(event.home)}
+        </div>
+        <p class="sport-time">${new Date(event.date).toLocaleString([], { timeZone: getClockTimeZone() })}</p>
+        <p class="sport-extra">${event.note || ""}</p>
+      `;
+      ui.sportsCards.appendChild(card);
+    });
+  });
+}
+
+async function loadSports() {
+  ui.sportsMeta.textContent = "Refreshing sports feed...";
+  try {
+    const events = await fetchSportsEvents();
+    const filtered = events
+      .filter((e) => (e.key === "nba" && state.sports.showNba) || (e.key === "soccer" && state.sports.showSoccer) || (e.key === "f1" && state.sports.showF1))
+      .sort((a, b) => eventSortValue(a.status) - eventSortValue(b.status) || new Date(a.date) - new Date(b.date));
+    if (!filtered.length) throw new Error("no events");
+    renderSportsCards(filtered);
+    ui.sportsMeta.textContent = "Live/upcoming/final from ESPN scoreboard feeds.";
+  } catch {
+    const fallback = getFallbackSportsData().filter((e) =>
+      (e.key === "nba" && state.sports.showNba) ||
+      (e.key === "soccer" && state.sports.showSoccer) ||
+      (e.key === "f1" && state.sports.showF1)
+    );
+    renderSportsCards(fallback);
+    ui.sportsMeta.textContent = "Feed unavailable now, showing fallback schedule.";
+  }
 }
 
 function setupEvents() {
-  ui.todoForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const text = ui.todoInput.value.trim();
-    if (!text) {
-      return;
-    }
-
-    state.todos.unshift({ id: crypto.randomUUID(), text, done: false });
-    ui.todoInput.value = "";
-    persistState();
-    renderTodos();
-  });
-
-  ui.linkForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const name = ui.linkName.value.trim();
-    const rawUrl = ui.linkUrl.value.trim();
-    if (!name || !rawUrl) {
-      return;
-    }
-
-    const url = normalizeUrl(rawUrl);
-    try {
-      new URL(url);
-    } catch {
-      alert("Please enter a valid link URL.");
-      return;
-    }
-
-    state.links.push({ id: crypto.randomUUID(), name, url });
-    ui.linkName.value = "";
-    ui.linkUrl.value = "";
-    persistState();
-    renderLinks();
-  });
-
-  ui.saveAppearance.addEventListener("click", () => {
-    state.appearance.colorStart = ui.colorStart.value;
-    state.appearance.colorEnd = ui.colorEnd.value;
-    state.appearance.imageUrl = ui.backgroundImage.value.trim();
-    persistState();
-    applyAppearance();
-  });
-
-  ui.clearImage.addEventListener("click", () => {
-    state.appearance.imageUrl = "";
-    ui.backgroundImage.value = "";
-    persistState();
-    applyAppearance();
-  });
-
   ui.modeToggle.addEventListener("click", () => {
     state.mode = state.mode === "dark" ? "light" : "dark";
     persistState();
     applyMode();
   });
+  ui.focusToggle.addEventListener("click", () => {
+    state.focusMode = !state.focusMode;
+    persistState();
+    applyFocusMode();
+  });
+  ui.timeZoneSelect.addEventListener("change", () => {
+    state.timeZone = ui.timeZoneSelect.value;
+    persistState();
+    updateClock();
+  });
+  ui.searchForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    runSearch(ui.searchInput.value);
+  });
+  ui.appFormToggle.addEventListener("click", () => {
+    setAppFormOpen(ui.appForm.hidden);
+  });
+  ui.appForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const name = ui.appName.value.trim();
+    const rawUrl = ui.appUrl.value.trim();
+    const icon = ui.appIcon.value.trim();
+    if (!name || !rawUrl) return;
+    const url = normalizeUrl(rawUrl);
+    try {
+      new URL(url);
+    } catch {
+      alert("Please enter a valid app URL.");
+      return;
+    }
+    state.apps.push({ id: crypto.randomUUID(), name, url, iconUrl: icon });
+    ui.appForm.reset();
+    setAppFormOpen(false);
+    persistState();
+    renderApps();
+  });
+  ui.prevMonth.addEventListener("click", () => {
+    state.calendarDate = new Date(state.calendarDate.getFullYear(), state.calendarDate.getMonth() - 1, 1);
+    renderCalendar();
+  });
+  ui.nextMonth.addEventListener("click", () => {
+    state.calendarDate = new Date(state.calendarDate.getFullYear(), state.calendarDate.getMonth() + 1, 1);
+    renderCalendar();
+  });
+  ui.saveAppearance.addEventListener("click", () => {
+    state.appearance.colorStart = ui.colorStart.value;
+    state.appearance.colorEnd = ui.colorEnd.value;
+    state.appearance.preset = ui.visualPreset.value;
+    state.appearance.motionLevel = Number(ui.motionLevel.value);
+    state.appearance.mode = ui.backgroundMode.value;
+    state.appearance.imageUrl = ui.backgroundImage.value.trim();
+    state.appearance.videoUrl = ui.backgroundVideo.value.trim();
+    persistState();
+    applyAppearance();
+  });
+  ui.visualPreset.addEventListener("change", () => {
+    state.appearance.preset = ui.visualPreset.value;
+    applyPreset(state.appearance.preset);
+    applyAppearance();
+  });
+  ui.clearImage.addEventListener("click", () => {
+    state.appearance.imageUrl = "";
+    state.appearance.videoUrl = "";
+    ui.backgroundImage.value = "";
+    ui.backgroundVideo.value = "";
+    persistState();
+    applyAppearance();
+  });
+  ui.toggleNba.addEventListener("change", () => {
+    state.sports.showNba = ui.toggleNba.checked;
+    persistState();
+    loadSports();
+  });
+  ui.toggleSoccer.addEventListener("change", () => {
+    state.sports.showSoccer = ui.toggleSoccer.checked;
+    persistState();
+    loadSports();
+  });
+  ui.toggleF1.addEventListener("change", () => {
+    state.sports.showF1 = ui.toggleF1.checked;
+    persistState();
+    loadSports();
+  });
+  ui.refreshSports.addEventListener("click", () => {
+    loadSports();
+  });
+  ui.refreshWeather.addEventListener("click", () => {
+    loadWeather();
+  });
+}
+
+function hydrateUiState() {
+  ui.toggleNba.checked = state.sports.showNba;
+  ui.toggleSoccer.checked = state.sports.showSoccer;
+  ui.toggleF1.checked = state.sports.showF1;
+  ui.timeZoneSelect.value = state.timeZone;
 }
 
 function init() {
   loadState();
+  if (PRESETS[state.appearance.preset]) applyPreset(state.appearance.preset);
+  hydrateUiState();
   updateClock();
   setInterval(updateClock, 1000);
-
   applyMode();
+  applyFocusMode();
   applyAppearance();
-  renderTodos();
-  renderLinks();
+  renderApps();
+  renderCalendar();
+  loadWeather();
+  loadSports();
   setupEvents();
   persistState();
 }

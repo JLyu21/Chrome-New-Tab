@@ -1,11 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Focus New Tab Dashboard",
-  "description": "A customizable new tab dashboard with clock, todos, quick links, and theme controls.",
+  "name": "Jay New Tab Dashboard",
+  "description": "A full-screen customizable new tab with sports, calendar, app shortcuts, and animated backgrounds.",
   "version": "1.0.0",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
+  "host_permissions": [
+    "https://site.api.espn.com/*",
+    "https://api.open-meteo.com/*"
+  ],
   "browser_specific_settings": {
     "gecko": {
       "id": "focus-new-tab@example.com",

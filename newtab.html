@@ -3,102 +3,162 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Focus Dashboard</title>
+    <title>New Tab</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <video id="bgVideo" class="bg-video" autoplay muted loop playsinline></video>
+    <div class="bg-animated-glow" aria-hidden="true"></div>
     <div class="background-overlay"></div>
+
     <main class="dashboard">
       <header class="hero card">
-        <div>
+        <div class="hero-left">
           <p id="greeting" class="eyebrow">Good day</p>
-          <h1>Focus Dashboard</h1>
-          <p class="muted">Everything you need, one new tab away.</p>
+          <h1 id="heroTitle">Hi Jay</h1>
+          <p class="hero-subtitle">Locked in, loaded up, and ready for whatever tab you were about to open.</p>
+          <p id="liveAge" class="live-age">Age loading...</p>
+          <div class="hero-tags">
+            <span class="hero-tag">Daily launchpad</span>
+            <span class="hero-tag">Live sports radar</span>
+            <span class="hero-tag">Clean shortcut dock</span>
+          </div>
+          <form id="searchForm" class="search-form">
+            <input id="searchInput" type="text" placeholder="Search Google, paste a URL, check scores, start anything..." autocomplete="off" />
+            <button class="button" type="submit">Search</button>
+          </form>
         </div>
+        <section class="hero-calendar" aria-label="Calendar">
+          <div class="pane-title">
+            <h2>Calendar</h2>
+            <div class="calendar-controls">
+              <button id="prevMonth" class="button button-small button-secondary" type="button">Prev</button>
+              <button id="nextMonth" class="button button-small button-secondary" type="button">Next</button>
+            </div>
+          </div>
+          <p id="calendarLabel" class="calendar-label">Month Year</p>
+          <div id="calendarGrid" class="calendar-grid" aria-label="Calendar days"></div>
+        </section>
         <div class="hero-right">
-          <p id="clock" class="clock-time">--:--:--</p>
+          <p id="clock" class="clock-time">--:--</p>
           <p id="date" class="clock-date">---</p>
-          <button id="modeToggle" class="button" type="button" aria-label="Toggle light or dark mode">
-            Toggle theme
-          </button>
+          <div class="hero-weather">
+            <p class="hero-weather-label">Weather</p>
+            <p id="weatherMeta" class="hero-weather-value muted">Loading weather...</p>
+            <button id="refreshWeather" class="button button-small button-secondary" type="button">Refresh</button>
+          </div>
+          <div class="timezone-row">
+            <label for="timeZoneSelect">Time zone</label>
+            <select id="timeZoneSelect">
+              <option value="system">System default</option>
+              <option value="America/Los_Angeles">Los Angeles (PT)</option>
+              <option value="America/Denver">Denver (MT)</option>
+              <option value="America/Chicago">Chicago (CT)</option>
+              <option value="America/New_York">New York (ET)</option>
+              <option value="Europe/London">London</option>
+              <option value="Europe/Paris">Paris</option>
+              <option value="Asia/Shanghai">Shanghai</option>
+              <option value="Asia/Tokyo">Tokyo</option>
+            </select>
+          </div>
+          <div class="hero-actions">
+            <button id="modeToggle" class="button button-secondary" type="button">Toggle theme</button>
+            <button id="focusToggle" class="button" type="button">Focus mode</button>
+          </div>
         </div>
       </header>
 
-      <section class="content-grid">
-        <section class="left-column">
-          <section class="card pane">
-            <div class="pane-title">
-              <h2>Quick Links</h2>
-              <span class="muted">Jump faster</span>
-            </div>
-            <form id="linkForm" class="form-grid">
-              <input id="linkName" type="text" maxlength="40" placeholder="Name" required />
-              <input id="linkUrl" type="url" placeholder="https://example.com" required />
-              <button class="button" type="submit">Add link</button>
-            </form>
-            <ul id="quickLinks" class="links-list"></ul>
-          </section>
-
-          <section class="card pane">
-            <div class="pane-title">
-              <h2>Appearance</h2>
-              <span class="muted">Make it yours</span>
-            </div>
-            <div class="appearance-grid">
-              <label>
-                Gradient start
-                <input id="colorStart" type="color" value="#1d4ed8" />
-              </label>
-              <label>
-                Gradient end
-                <input id="colorEnd" type="color" value="#9333ea" />
-              </label>
-              <label class="wide">
-                Background image URL
-                <input id="backgroundImage" type="url" placeholder="https://images.example.com/photo.jpg" />
-              </label>
-            </div>
-            <div class="actions">
-              <button id="saveAppearance" class="button" type="button">Save appearance</button>
-              <button id="clearImage" class="button button-secondary" type="button">Use gradient only</button>
-            </div>
-          </section>
-        </section>
-
-        <section class="card pane right-column">
+      <section class="content-grid full-layout">
+        <section class="card pane shortcuts-panel">
           <div class="pane-title">
-            <h2>Todo List</h2>
-            <span class="muted">Stay on track</span>
+            <h2>App Shortcuts</h2>
+            <button id="appFormToggle" class="button button-small button-secondary" type="button" aria-expanded="false" aria-controls="appForm">
+              Add shortcut
+            </button>
           </div>
-          <form id="todoForm" class="form-grid form-todo">
-            <input id="todoInput" type="text" maxlength="120" placeholder="Add a task..." required />
+          <form id="appForm" class="form-grid app-form compact-add-app" hidden>
+            <input id="appName" type="text" maxlength="30" placeholder="Name" required />
+            <input id="appUrl" type="url" placeholder="https://example.com" required />
+            <input id="appIcon" type="url" placeholder="Icon URL" />
             <button class="button" type="submit">Add</button>
           </form>
-          <ul id="todoList" class="todo-list" aria-live="polite"></ul>
+          <ul id="appGrid" class="app-grid"></ul>
+        </section>
+
+        <section class="card pane sports-panel">
+          <div class="pane-title">
+            <h2>Sports Hub</h2>
+            <span class="muted">NBA, Soccer, F1</span>
+          </div>
+          <div class="sports-controls">
+            <label><input id="toggleNba" type="checkbox" checked /> NBA</label>
+            <label><input id="toggleSoccer" type="checkbox" checked /> Soccer</label>
+            <label><input id="toggleF1" type="checkbox" checked /> F1</label>
+            <button id="refreshSports" class="button button-small button-secondary" type="button">Refresh</button>
+          </div>
+          <p id="sportsMeta" class="muted">Loading latest scoreboard feed...</p>
+          <div id="sportsCards" class="sports-cards"></div>
+        </section>
+
+        <section class="card pane appearance-panel">
+          <div class="pane-title">
+            <h2>Appearance + Animation</h2>
+            <span class="muted">Full-screen visual settings</span>
+          </div>
+          <div class="appearance-grid">
+            <label>
+              Visual preset
+              <select id="visualPreset">
+                <option value="neo-night">Neo Night</option>
+                <option value="sunset-pulse">Sunset Pulse</option>
+                <option value="aurora">Aurora</option>
+                <option value="mono-glass">Mono Glass</option>
+              </select>
+            </label>
+            <label>
+              Motion level
+              <input id="motionLevel" type="range" min="0" max="100" step="5" value="65" />
+            </label>
+            <label>
+              Accent start
+              <input id="colorStart" type="color" value="#1d4ed8" />
+            </label>
+            <label>
+              Accent end
+              <input id="colorEnd" type="color" value="#9333ea" />
+            </label>
+            <label>
+              Background mode
+              <select id="backgroundMode">
+                <option value="animated-gradient">Animated gradient</option>
+                <option value="image">Static image</option>
+                <option value="anime-video">Anime video</option>
+              </select>
+            </label>
+            <label class="wide">
+              Image URL
+              <input id="backgroundImage" type="url" placeholder="https://images.example.com/wallpaper.jpg" />
+            </label>
+            <label class="wide">
+              Anime video URL (mp4/webm)
+              <input id="backgroundVideo" type="url" placeholder="https://cdn.example.com/anime-loop.mp4" />
+            </label>
+          </div>
+          <div class="actions">
+            <button id="saveAppearance" class="button" type="button">Save look</button>
+            <button id="clearImage" class="button button-secondary" type="button">Reset media</button>
+          </div>
         </section>
       </section>
     </main>
 
-    <template id="todoItemTemplate">
-      <li class="todo-item">
-        <label>
-          <input class="todo-check" type="checkbox" />
-          <span class="todo-text"></span>
-        </label>
-        <button class="button button-small button-secondary todo-delete" type="button">Delete</button>
-      </li>
-    </template>
-
-    <template id="linkItemTemplate">
-      <li class="link-item">
-        <a class="link-anchor" target="_blank" rel="noopener noreferrer">
-          <span class="link-icon" aria-hidden="true"></span>
-          <span class="link-meta">
-            <span class="link-name"></span>
-            <span class="link-url"></span>
-          </span>
+    <template id="appItemTemplate">
+      <li class="app-item">
+        <a class="app-link" target="_blank" rel="noopener noreferrer">
+          <img class="app-logo" alt="" />
+          <span class="app-name"></span>
         </a>
-        <button class="button button-small button-secondary link-delete" type="button">Remove</button>
+        <button class="button button-small button-secondary app-delete" type="button">x</button>
       </li>
     </template>
 

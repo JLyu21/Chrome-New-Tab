@@ -14,7 +14,14 @@
         <div class="hero-left">
           <p id="greeting" class="eyebrow">Good day</p>
           <h1 id="heroTitle">Hi Jay</h1>
-          <p id="liveAge" class="live-age">Age loading...</p>
+          <div class="lunar-status" aria-live="polite">
+            <span class="lunar-seal" aria-hidden="true">春</span>
+            <div class="lunar-copy">
+              <p class="lunar-kicker">春节倒计时 · Spring Festival</p>
+              <p id="heroStatus" class="lunar-countdown">Loading lunar countdown...</p>
+              <p id="lunarDetail" class="lunar-detail">Next lunar year loading...</p>
+            </div>
+          </div>
           <form id="searchForm" class="search-form">
             <input id="searchInput" type="text" placeholder="Search Google, paste a URL, check scores, start anything..." autocomplete="off" />
             <button class="button" type="submit">Search</button>

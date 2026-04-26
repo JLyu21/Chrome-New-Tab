@@ -31,12 +31,27 @@ const state = {
   calendarDate: new Date()
 };
 
-const BIRTHDAY = new Date("2006-12-20T22:05:00");
+const MS_PER_SECOND = 1000;
+const SECONDS_PER_DAY = 24 * 60 * 60;
+
+const CHINESE_NEW_YEAR_DATES = [
+  { year: 2026, monthIndex: 1, day: 17, zodiac: "Fire Horse", hanzi: "马" },
+  { year: 2027, monthIndex: 1, day: 6, zodiac: "Fire Goat", hanzi: "羊" },
+  { year: 2028, monthIndex: 0, day: 26, zodiac: "Earth Monkey", hanzi: "猴" },
+  { year: 2029, monthIndex: 1, day: 13, zodiac: "Earth Rooster", hanzi: "鸡" },
+  { year: 2030, monthIndex: 1, day: 3, zodiac: "Metal Dog", hanzi: "狗" },
+  { year: 2031, monthIndex: 0, day: 23, zodiac: "Metal Pig", hanzi: "猪" },
+  { year: 2032, monthIndex: 1, day: 11, zodiac: "Water Rat", hanzi: "鼠" },
+  { year: 2033, monthIndex: 0, day: 31, zodiac: "Water Ox", hanzi: "牛" },
+  { year: 2034, monthIndex: 1, day: 19, zodiac: "Wood Tiger", hanzi: "虎" },
+  { year: 2035, monthIndex: 1, day: 8, zodiac: "Wood Rabbit", hanzi: "兔" }
+];
 
 const ui = {
   greeting: document.getElementById("greeting"),
   heroTitle: document.getElementById("heroTitle"),
-  liveAge: document.getElementById("liveAge"),
+  heroStatus: document.getElementById("heroStatus"),
+  lunarDetail: document.getElementById("lunarDetail"),
   searchForm: document.getElementById("searchForm"),
   searchInput: document.getElementById("searchInput"),
   clock: document.getElementById("clock"),
@@ -108,9 +123,53 @@ function updateGreeting(hour) {
   ui.heroTitle.textContent = "Hi Jay";
 }
 
-function updateLiveAge(now) {
-  const years = (now.getTime() - BIRTHDAY.getTime()) / (365.2425 * 24 * 60 * 60 * 1000);
-  ui.liveAge.textContent = `Age: ${years.toFixed(9)} years`;
+function padTime(value) {
+  return String(value).padStart(2, "0");
+}
+
+function getChineseNewYearDate(entry) {
+  return new Date(entry.year, entry.monthIndex, entry.day);
+}
+
+function getNextChineseNewYear(now) {
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+
+  return CHINESE_NEW_YEAR_DATES.find((entry) => getChineseNewYearDate(entry) >= todayStart);
+}
+
+function updateHeroStatus(now) {
+  const nextYear = getNextChineseNewYear(now);
+  if (!nextYear) {
+    ui.heroStatus.textContent = "Spring Festival dates need an update";
+    ui.lunarDetail.textContent = "Add the next lunar year in script.js";
+    return;
+  }
+
+  const target = getChineseNewYearDate(nextYear);
+  const isToday =
+    now.getFullYear() === target.getFullYear() &&
+    now.getMonth() === target.getMonth() &&
+    now.getDate() === target.getDate();
+
+  ui.lunarDetail.textContent =
+    `${nextYear.year} ${nextYear.zodiac} Year · ${nextYear.hanzi} · ` +
+    target.toLocaleDateString([], { month: "short", day: "numeric" });
+
+  if (isToday) {
+    ui.heroStatus.textContent = `新年快乐 // ${nextYear.zodiac} year starts today`;
+    return;
+  }
+
+  const totalSeconds = Math.max(0, Math.ceil((target - now) / MS_PER_SECOND));
+  const days = Math.floor(totalSeconds / SECONDS_PER_DAY);
+  const hours = Math.floor((totalSeconds % SECONDS_PER_DAY) / (60 * 60));
+  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+  const seconds = totalSeconds % 60;
+
+  ui.heroStatus.textContent =
+    `${days}d ${padTime(hours)}h ${padTime(minutes)}m ${padTime(seconds)}s ` +
+    `until Lunar New Year`;
 }
 
 function updateProgress(now) {
@@ -148,7 +207,7 @@ function updateClock() {
     new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: false, timeZone: tz }).format(now)
   );
   updateGreeting(hour);
-  updateLiveAge(now);
+  updateHeroStatus(now);
   updateProgress(now);
 }
 

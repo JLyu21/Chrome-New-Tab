@@ -127,56 +127,159 @@ body.light .background-overlay {
   min-width: 0;
   display: grid;
   align-content: center;
+  transform: translateY(-28px);
 }
 
 .eyebrow {
   margin: 0;
   text-transform: uppercase;
-  font-size: 0.76rem;
+  font-size: clamp(0.9rem, 1.2vw, 1.08rem);
   letter-spacing: 0.14em;
   color: var(--accent);
   font-weight: 700;
 }
 
 .hero h1 {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   font-size: clamp(3rem, 7vw, 6.6rem);
-  line-height: 0.88;
+  line-height: 0.94;
   letter-spacing: 0;
   color: var(--text);
   text-shadow: 0 18px 42px rgba(0, 0, 0, 0.72), 0 2px 0 rgba(0, 0, 0, 0.18);
 }
 
-.live-age {
-  width: fit-content;
-  margin: 18px 0 0;
-  padding: 9px 12px;
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
+.lunar-status {
+  position: relative;
+  overflow: hidden;
+  width: min(520px, 100%);
+  margin: 42px 0 0;
+  padding: 12px 16px 12px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 214, 132, 0.68);
+  border-left: 3px solid #ffcf6b;
   border-radius: 8px;
-  background: rgba(8, 12, 18, 0.14);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 225, 147, 0.28), transparent 34%),
+    linear-gradient(135deg, rgba(142, 16, 22, 0.58), rgba(13, 18, 25, 0.18) 62%),
+    rgba(8, 12, 18, 0.28);
   color: #fff2cf;
-  font-size: clamp(0.95rem, 1.4vw, 1.12rem);
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.lunar-status::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent, rgba(255, 235, 173, 0.2) 45%, transparent 64%);
+  transform: translateX(-38%);
+}
+
+.lunar-seal {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 226, 142, 0.78);
+  border-radius: 8px;
+  background: linear-gradient(145deg, #c51d24, #7b1118);
+  color: #ffe38c;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 10px 22px rgba(0, 0, 0, 0.24);
+}
+
+.lunar-copy {
+  position: relative;
+  min-width: 0;
+}
+
+.lunar-kicker,
+.lunar-countdown,
+.lunar-detail {
+  margin: 0;
+}
+
+.lunar-kicker {
+  color: #ffe38c;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lunar-countdown {
+  margin-top: 3px;
+  color: #fff8df;
+  font-size: 1.08rem;
+  font-weight: 800;
+  line-height: 1.22;
+  overflow-wrap: anywhere;
+}
+
+.lunar-detail {
+  margin-top: 3px;
+  color: rgba(255, 242, 207, 0.84);
+  font-size: 0.88rem;
   line-height: 1.25;
 }
 
-body.light .live-age {
+body.light .lunar-status {
   color: #17392f;
-  background: rgba(244, 250, 239, 0.72);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(214, 52, 54, 0.18), transparent 36%),
+    linear-gradient(135deg, rgba(214, 52, 54, 0.24), rgba(255, 247, 225, 0.72) 58%),
+    rgba(244, 250, 239, 0.72);
+  box-shadow:
+    0 18px 42px rgba(25, 39, 34, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.54);
+}
+
+body.light .lunar-kicker,
+body.light .lunar-countdown {
+  color: #6f1519;
+  text-shadow: none;
+}
+
+body.light .lunar-detail {
+  color: #405750;
+  text-shadow: none;
 }
 
 .search-form {
-  margin-top: 24px;
+  margin-top: 36px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   width: min(1050px, 100%);
-  padding: 7px;
-  border: 1px solid var(--border);
+  padding: 8px;
+  border: 1px solid var(--border-strong);
   border-radius: 12px;
-  background: rgba(8, 12, 18, 0.18);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(4px) saturate(112%);
+  background:
+    linear-gradient(135deg, rgba(255, 207, 107, 0.18), rgba(142, 216, 255, 0.08)),
+    rgba(8, 12, 18, 0.3);
+  box-shadow:
+    0 24px 58px rgba(0, 0, 0, 0.26),
+    0 0 36px rgba(255, 196, 111, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(8px) saturate(128%);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.search-form:focus-within {
+  border-color: rgba(255, 223, 156, 0.88);
+  box-shadow:
+    0 28px 68px rgba(0, 0, 0, 0.3),
+    0 0 42px rgba(255, 196, 111, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .search-form input {
@@ -189,7 +292,9 @@ body.light .live-age {
     linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 241, 219, 0.78)),
     rgba(255, 249, 238, 0.86);
   color: #170d09;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.56),
+    0 8px 22px rgba(0, 0, 0, 0.12);
 }
 
 .search-form input::placeholder {
@@ -197,9 +302,12 @@ body.light .live-age {
 }
 
 .search-form .button {
-  min-width: 122px;
+  min-width: 132px;
   font-weight: 800;
   font-size: 1.02rem;
+  box-shadow:
+    0 12px 26px rgba(214, 78, 61, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
 }
 
 .hero-right {
@@ -747,6 +855,17 @@ body.focus-mode .content-grid {
   .hero {
     min-height: 0;
     padding: 18px;
+  }
+
+  .lunar-status {
+    align-items: flex-start;
+  }
+
+  .lunar-seal {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    font-size: 1.45rem;
   }
 
   .search-form {

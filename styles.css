@@ -1,8 +1,8 @@
 :root {
   --text: #f8fbff;
   --muted: #d3d9ee;
-  --panel-bg: rgba(9, 12, 23, 0.34);
-  --panel-bg-strong: rgba(12, 17, 31, 0.48);
+  --panel-bg: rgba(9, 12, 23, 0.27);
+  --panel-bg-strong: rgba(12, 17, 31, 0.39);
   --border: rgba(235, 244, 255, 0.22);
   --border-strong: rgba(132, 232, 255, 0.44);
   --accent: #ff6ea8;
@@ -16,8 +16,8 @@
 body.light {
   --text: #f8fbff;
   --muted: #e4e9ff;
-  --panel-bg: rgba(245, 250, 255, 0.22);
-  --panel-bg-strong: rgba(250, 253, 255, 0.34);
+  --panel-bg: rgba(245, 250, 255, 0.16);
+  --panel-bg-strong: rgba(250, 253, 255, 0.26);
   --border: rgba(255, 255, 255, 0.28);
   --border-strong: rgba(132, 232, 255, 0.5);
   --button-text: #07101c;
@@ -67,16 +67,16 @@ body {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 18%, rgba(132, 232, 255, 0.08), transparent 30%),
-    linear-gradient(90deg, rgba(4, 6, 15, 0.22) 0%, rgba(7, 10, 22, 0.08) 48%, rgba(7, 10, 22, 0.04) 100%),
-    linear-gradient(180deg, rgba(4, 6, 15, 0.04) 0%, rgba(4, 6, 15, 0.18) 100%);
+    radial-gradient(circle at 50% 18%, rgba(132, 232, 255, 0.05), transparent 30%),
+    linear-gradient(90deg, rgba(4, 6, 15, 0.17) 0%, rgba(7, 10, 22, 0.06) 48%, rgba(7, 10, 22, 0.025) 100%),
+    linear-gradient(180deg, rgba(4, 6, 15, 0.025) 0%, rgba(4, 6, 15, 0.12) 100%);
 }
 
 body.light .background-overlay {
   background:
-    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.08), transparent 28%),
-    linear-gradient(90deg, rgba(6, 9, 20, 0.14) 0%, rgba(6, 9, 20, 0.04) 46%, rgba(255, 255, 255, 0.02) 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(6, 9, 20, 0.12) 100%);
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.05), transparent 28%),
+    linear-gradient(90deg, rgba(6, 9, 20, 0.08) 0%, rgba(6, 9, 20, 0.02) 46%, rgba(255, 255, 255, 0.01) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(6, 9, 20, 0.07) 100%);
 }
 
 .dashboard {
@@ -98,7 +98,7 @@ body.light .background-overlay {
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: var(--shadow);
-  backdrop-filter: blur(5px) saturate(125%);
+  backdrop-filter: blur(3px) saturate(120%);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.78), 0 0 18px rgba(0, 0, 0, 0.42);
 }
 
@@ -186,9 +186,9 @@ body.light .card {
   border-left: 3px solid var(--accent);
   border-radius: 8px;
   background:
-    radial-gradient(circle at 12% 0%, rgba(132, 232, 255, 0.16), transparent 34%),
-    linear-gradient(135deg, rgba(255, 110, 168, 0.32), rgba(12, 17, 31, 0.34) 62%),
-    rgba(9, 12, 23, 0.24);
+    radial-gradient(circle at 12% 0%, rgba(132, 232, 255, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(255, 110, 168, 0.22), rgba(12, 17, 31, 0.24) 62%),
+    rgba(9, 12, 23, 0.18);
   color: #f8fbff;
   box-shadow:
     0 18px 46px rgba(0, 0, 0, 0.34),
@@ -271,8 +271,8 @@ body.light .signal-status {
   color: #f8fbff;
   background:
     radial-gradient(circle at 12% 0%, rgba(132, 232, 255, 0.18), transparent 36%),
-    linear-gradient(135deg, rgba(255, 110, 168, 0.22), rgba(245, 250, 255, 0.24) 58%),
-    rgba(245, 250, 255, 0.18);
+    linear-gradient(135deg, rgba(255, 110, 168, 0.16), rgba(245, 250, 255, 0.18) 58%),
+    rgba(245, 250, 255, 0.12);
   box-shadow:
     0 18px 42px rgba(8, 12, 24, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.54);
@@ -320,8 +320,8 @@ body.light .signal-detail {
   border: 1px solid var(--border-strong);
   border-radius: 12px;
   background:
-    linear-gradient(135deg, rgba(255, 110, 168, 0.14), rgba(132, 232, 255, 0.1)),
-    rgba(9, 12, 23, 0.32);
+    linear-gradient(135deg, rgba(255, 110, 168, 0.1), rgba(132, 232, 255, 0.07)),
+    rgba(9, 12, 23, 0.26);
   box-shadow:
     0 24px 58px rgba(0, 0, 0, 0.3),
     0 0 36px rgba(132, 232, 255, 0.14),
@@ -398,8 +398,8 @@ body.light .signal-detail {
   border: 1px solid var(--border);
   border-radius: 8px;
   background:
-    linear-gradient(135deg, rgba(132, 232, 255, 0.08), transparent),
-    rgba(9, 12, 23, 0.22);
+    linear-gradient(135deg, rgba(132, 232, 255, 0.06), transparent),
+    rgba(9, 12, 23, 0.18);
 }
 
 .progress-head {
@@ -604,7 +604,7 @@ a:focus-visible {
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: rgba(9, 12, 23, 0.22);
+  background: rgba(9, 12, 23, 0.18);
 }
 
 .compact-add-app input {
@@ -734,7 +734,7 @@ h3 {
   padding: 12px;
   background:
     linear-gradient(135deg, rgba(235, 244, 255, 0.07), transparent 42%),
-    rgba(9, 12, 23, 0.22);
+    rgba(9, 12, 23, 0.18);
 }
 
 .sport-head {
@@ -886,7 +886,7 @@ body.light .button-secondary {
 body.light .compact-add-app,
 body.light .sport-card,
 body.light .hero-progress {
-  background: rgba(245, 250, 255, 0.18);
+  background: rgba(245, 250, 255, 0.12);
 }
 
 body.light .app-link,

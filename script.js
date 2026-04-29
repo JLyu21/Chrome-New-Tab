@@ -34,24 +34,20 @@ const state = {
 const MS_PER_SECOND = 1000;
 const SECONDS_PER_DAY = 24 * 60 * 60;
 
-const CHINESE_NEW_YEAR_DATES = [
-  { year: 2026, monthIndex: 1, day: 17, zodiac: "Fire Horse", hanzi: "马" },
-  { year: 2027, monthIndex: 1, day: 6, zodiac: "Fire Goat", hanzi: "羊" },
-  { year: 2028, monthIndex: 0, day: 26, zodiac: "Earth Monkey", hanzi: "猴" },
-  { year: 2029, monthIndex: 1, day: 13, zodiac: "Earth Rooster", hanzi: "鸡" },
-  { year: 2030, monthIndex: 1, day: 3, zodiac: "Metal Dog", hanzi: "狗" },
-  { year: 2031, monthIndex: 0, day: 23, zodiac: "Metal Pig", hanzi: "猪" },
-  { year: 2032, monthIndex: 1, day: 11, zodiac: "Water Rat", hanzi: "鼠" },
-  { year: 2033, monthIndex: 0, day: 31, zodiac: "Water Ox", hanzi: "牛" },
-  { year: 2034, monthIndex: 1, day: 19, zodiac: "Wood Tiger", hanzi: "虎" },
-  { year: 2035, monthIndex: 1, day: 8, zodiac: "Wood Rabbit", hanzi: "兔" }
+const SIGNAL_PHASES = [
+  { hour: 0, name: "Midnight Drift", seal: "✦", mood: "low glow // quiet tabs // soft focus" },
+  { hour: 5, name: "Dawn Bloom", seal: "◇", mood: "first light // reset energy // clean start" },
+  { hour: 10, name: "Daystream", seal: "◆", mood: "bright current // task flow // steady pace" },
+  { hour: 16, name: "Afterglow Run", seal: "◈", mood: "warm fade // wrap-up mode // loose ends" },
+  { hour: 20, name: "Neon Reverie", seal: "✧", mood: "animated sky // deep focus // late-night signal" }
 ];
 
 const ui = {
   greeting: document.getElementById("greeting"),
   heroTitle: document.getElementById("heroTitle"),
   heroStatus: document.getElementById("heroStatus"),
-  lunarDetail: document.getElementById("lunarDetail"),
+  signalSeal: document.getElementById("signalSeal"),
+  signalDetail: document.getElementById("signalDetail"),
   searchForm: document.getElementById("searchForm"),
   searchInput: document.getElementById("searchInput"),
   clock: document.getElementById("clock"),
@@ -127,49 +123,37 @@ function padTime(value) {
   return String(value).padStart(2, "0");
 }
 
-function getChineseNewYearDate(entry) {
-  return new Date(entry.year, entry.monthIndex, entry.day);
-}
+function getSignalPhase(now) {
+  const currentHour = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+  const activeIndex = SIGNAL_PHASES.findLastIndex((phase) => currentHour >= phase.hour);
+  const phaseIndex = activeIndex === -1 ? SIGNAL_PHASES.length - 1 : activeIndex;
+  const nextIndex = (phaseIndex + 1) % SIGNAL_PHASES.length;
+  const phase = SIGNAL_PHASES[phaseIndex];
+  const nextPhase = SIGNAL_PHASES[nextIndex];
+  const nextShift = new Date(now);
 
-function getNextChineseNewYear(now) {
-  const todayStart = new Date(now);
-  todayStart.setHours(0, 0, 0, 0);
+  nextShift.setHours(nextPhase.hour, 0, 0, 0);
+  if (nextIndex <= phaseIndex) nextShift.setDate(nextShift.getDate() + 1);
 
-  return CHINESE_NEW_YEAR_DATES.find((entry) => getChineseNewYearDate(entry) >= todayStart);
+  return { phase, nextPhase, nextShift };
 }
 
 function updateHeroStatus(now) {
-  const nextYear = getNextChineseNewYear(now);
-  if (!nextYear) {
-    ui.heroStatus.textContent = "Spring Festival dates need an update";
-    ui.lunarDetail.textContent = "Add the next lunar year in script.js";
-    return;
-  }
+  const { phase, nextPhase, nextShift } = getSignalPhase(now);
+  const phaseStart = new Date(now);
+  phaseStart.setHours(phase.hour, 0, 0, 0);
 
-  const target = getChineseNewYearDate(nextYear);
-  const isToday =
-    now.getFullYear() === target.getFullYear() &&
-    now.getMonth() === target.getMonth() &&
-    now.getDate() === target.getDate();
-
-  ui.lunarDetail.textContent =
-    `${nextYear.year} ${nextYear.zodiac} Year · ${nextYear.hanzi} · ` +
-    target.toLocaleDateString([], { month: "short", day: "numeric" });
-
-  if (isToday) {
-    ui.heroStatus.textContent = `新年快乐 // ${nextYear.zodiac} year starts today`;
-    return;
-  }
-
-  const totalSeconds = Math.max(0, Math.ceil((target - now) / MS_PER_SECOND));
-  const days = Math.floor(totalSeconds / SECONDS_PER_DAY);
-  const hours = Math.floor((totalSeconds % SECONDS_PER_DAY) / (60 * 60));
+  const totalSeconds = Math.max(0, Math.ceil((nextShift - now) / MS_PER_SECOND));
+  const phaseSeconds = Math.max(1, (nextShift - phaseStart) / MS_PER_SECOND);
+  const hours = Math.floor(totalSeconds / (60 * 60));
   const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
   const seconds = totalSeconds % 60;
+  const phaseProgress = 100 - (totalSeconds / phaseSeconds) * 100;
 
-  ui.heroStatus.textContent =
-    `${days}d ${padTime(hours)}h ${padTime(minutes)}m ${padTime(seconds)}s ` +
-    `until Lunar New Year`;
+  ui.signalSeal.textContent = phase.seal;
+  ui.heroStatus.textContent = `${phase.name} // ${Math.max(0, Math.min(99, Math.floor(phaseProgress)))}% synced`;
+  ui.signalDetail.textContent =
+    `${phase.mood} // next: ${nextPhase.name} in ${padTime(hours)}:${padTime(minutes)}:${padTime(seconds)}`;
 }
 
 function updateProgress(now) {

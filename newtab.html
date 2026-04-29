@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <video class="animated-background" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+      <source src="assets/anime-wallpaper.mp4" type="video/mp4" />
+    </video>
     <div class="background-overlay"></div>
 
     <main class="dashboard">
@@ -14,12 +17,12 @@
         <div class="hero-left">
           <p id="greeting" class="eyebrow">Good day</p>
           <h1 id="heroTitle">Hi Jay</h1>
-          <div class="lunar-status" aria-live="polite">
-            <span class="lunar-seal" aria-hidden="true">春</span>
-            <div class="lunar-copy">
-              <p class="lunar-kicker">春节倒计时 · Spring Festival</p>
-              <p id="heroStatus" class="lunar-countdown">Loading lunar countdown...</p>
-              <p id="lunarDetail" class="lunar-detail">Next lunar year loading...</p>
+          <div class="signal-status" aria-live="polite">
+            <span id="signalSeal" class="signal-seal" aria-hidden="true">✦</span>
+            <div class="signal-copy">
+              <p class="signal-kicker">Signal Phase // Ambient Sync</p>
+              <p id="heroStatus" class="signal-readout">Calibrating the skyline...</p>
+              <p id="signalDetail" class="signal-detail">Finding the current mood layer...</p>
             </div>
           </div>
           <form id="searchForm" class="search-form">

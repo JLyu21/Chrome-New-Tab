@@ -16,8 +16,7 @@ const defaults = {
   ],
   sports: {
     showNba: true,
-    showSoccer: true,
-    showF1: true
+    showSoccer: true
   },
   timeZone: "system"
 };
@@ -33,6 +32,7 @@ const state = {
 
 const MS_PER_SECOND = 1000;
 const SECONDS_PER_DAY = 24 * 60 * 60;
+const SPORTS_REFRESH_MS = 2 * 60 * 1000;
 
 const SIGNAL_PHASES = [
   { hour: 0, name: "Midnight Drift", seal: "✦", mood: "low glow // quiet tabs // soft focus" },
@@ -40,6 +40,25 @@ const SIGNAL_PHASES = [
   { hour: 10, name: "Daystream", seal: "◆", mood: "bright current // task flow // steady pace" },
   { hour: 16, name: "Afterglow Run", seal: "◈", mood: "warm fade // wrap-up mode // loose ends" },
   { hour: 20, name: "Neon Reverie", seal: "✧", mood: "animated sky // deep focus // late-night signal" }
+];
+
+const SOCCER_STANDINGS_LIMIT = 3;
+
+const SOCCER_STANDING_LEAGUES = [
+  ["eng.1", "Premier League"],
+  ["esp.1", "LaLiga"],
+  ["ger.1", "Bundesliga"],
+  ["ita.1", "Serie A"],
+  ["fra.1", "Ligue 1"]
+];
+
+const MAJOR_SOCCER_COMPETITIONS = [
+  ["uefa.champions", "Champions League"],
+  ["uefa.europa", "Europa League"],
+  ["fifa.world", "World Cup"],
+  ["fifa.wwc", "Women's World Cup"],
+  ["uefa.euro", "UEFA Euro"],
+  ["conmebol.america", "Copa America"]
 ];
 
 const ui = {
@@ -72,7 +91,6 @@ const ui = {
   yearProgressBar: document.getElementById("yearProgressBar"),
   toggleNba: document.getElementById("toggleNba"),
   toggleSoccer: document.getElementById("toggleSoccer"),
-  toggleF1: document.getElementById("toggleF1"),
   refreshSports: document.getElementById("refreshSports"),
   sportsMeta: document.getElementById("sportsMeta"),
   sportsCards: document.getElementById("sportsCards")
@@ -281,6 +299,20 @@ function isoNowAddHours(hours) {
 function getFallbackSportsData() {
   return [
     {
+      type: "standings",
+      key: "soccer",
+      league: "Premier League",
+      status: "standings",
+      date: new Date().toISOString(),
+      sortOrder: 0,
+      note: "Fallback top table",
+      standings: [
+        { rank: "1", name: "Arsenal", record: "26-7-5", points: "85", logo: "https://a.espncdn.com/i/teamlogos/soccer/500/359.png" },
+        { rank: "2", name: "Man City", record: "23-9-6", points: "78", logo: "https://a.espncdn.com/i/teamlogos/soccer/500/382.png" },
+        { rank: "3", name: "Man United", record: "20-11-7", points: "71", logo: "https://a.espncdn.com/i/teamlogos/soccer/500/360.png" }
+      ]
+    },
+    {
       key: "nba",
       league: "NBA",
       status: "upcoming",
@@ -311,15 +343,6 @@ function getFallbackSportsData() {
       date: isoNowAddHours(18),
       home: { name: "Real Madrid", score: "", record: "", logo: "https://a.espncdn.com/i/teamlogos/soccer/500/86.png" },
       away: { name: "Bayern", score: "", record: "", logo: "https://a.espncdn.com/i/teamlogos/soccer/500/132.png" }
-    },
-    {
-      key: "f1",
-      league: "Formula 1",
-      status: "finished",
-      date: isoNowAddHours(-8),
-      home: { name: "Max Verstappen", score: "1", record: "", logo: "https://a.espncdn.com/i/teamlogos/racing/500/f1.png" },
-      away: { name: "Lando Norris", score: "2", record: "", logo: "https://a.espncdn.com/i/teamlogos/racing/500/f1.png" },
-      note: "Race result"
     }
   ];
 }
@@ -338,6 +361,52 @@ function runSearch(rawValue) {
     target = `https://www.google.com/search?q=${encodeURIComponent(value)}`;
   }
   window.location.href = target;
+}
+
+function formatDateKey(date, timeZone = getClockTimeZone()) {
+  if (!timeZone) {
+    return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
+  }
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+  const getPart = (type) => parts.find((part) => part.type === type)?.value || "";
+  return `${getPart("year")}${getPart("month")}${getPart("day")}`;
+}
+
+function getSportsDateKeys() {
+  return [-1, 0, 1].map((offsetDays) => {
+    const date = new Date();
+    date.setDate(date.getDate() + offsetDays);
+    return formatDateKey(date);
+  });
+}
+
+function getSportsDateLabel() {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return `${yesterday.toLocaleDateString([], { month: "short", day: "numeric" })} - ${tomorrow.toLocaleDateString([], { month: "short", day: "numeric" })}`;
+}
+
+function isGameInsideSportsWindow(event, allowedDateKeys = getSportsDateKeys()) {
+  if (event.status === "standings") return true;
+  if (!event.date) return false;
+
+  const [yesterdayKey, todayKey, tomorrowKey] = Array.isArray(allowedDateKeys)
+    ? allowedDateKeys
+    : Array.from(allowedDateKeys);
+  const eventDateKey = formatDateKey(new Date(event.date));
+
+  if (event.status === "upcoming") return eventDateKey === todayKey || eventDateKey === tomorrowKey;
+  if (event.status === "finished") return eventDateKey === yesterdayKey || eventDateKey === todayKey;
+  if (event.status === "live") return eventDateKey === yesterdayKey || eventDateKey === todayKey || eventDateKey === tomorrowKey;
+  return eventDateKey === todayKey;
 }
 
 function pickStatus(event) {
@@ -385,11 +454,53 @@ function parseEspnEvent(key, league, event) {
   };
 }
 
+function getStatDisplay(stats, names) {
+  const stat = (stats || []).find((item) =>
+    names.includes(item.name) || names.includes(item.type) || names.includes(item.abbreviation)
+  );
+  return stat?.displayValue || stat?.summary || "";
+}
+
+function getSoccerTeamLogo(team) {
+  if (Array.isArray(team.logos) && team.logos[0]?.href) return team.logos[0].href;
+  if (typeof team.logo === "string" && team.logo) return team.logo;
+  if (team.id) return `https://a.espncdn.com/i/teamlogos/soccer/500/${team.id}.png`;
+  return "";
+}
+
+function parseSoccerStandings(league, sortOrder, data) {
+  const activeChild = (data.children || []).find((child) => child.standings?.entries?.length);
+  const standings = activeChild?.standings;
+  const entries = standings?.entries || [];
+  if (!entries.length) return null;
+
+  return {
+    type: "standings",
+    key: "soccer",
+    league,
+    status: "standings",
+    date: new Date().toISOString(),
+    sortOrder,
+    note: standings.seasonDisplayName || "Top table",
+    standings: entries.slice(0, SOCCER_STANDINGS_LIMIT).map((entry, index) => {
+      const team = entry.team || {};
+      const stats = entry.stats || [];
+      return {
+        rank: getStatDisplay(stats, ["rank", "R"]) || String(entry.note?.rank || index + 1),
+        name: team.shortDisplayName || team.displayName || team.name || "Team",
+        record: getStatDisplay(stats, ["total", "overall"]) || "",
+        points: getStatDisplay(stats, ["points", "P"]) || "-",
+        differential: getStatDisplay(stats, ["pointDifferential", "GD"]) || "",
+        logo: getSoccerTeamLogo(team)
+      };
+    })
+  };
+}
+
 function formatLiveDetail(event) {
   if (event.status !== "live") return event.detail || "";
   const parts = [];
   if (event.key === "nba" && event.period) parts.push(`Q${event.period}`);
-  else if (event.key === "f1" && event.period) parts.push(`Lap ${event.period}`);
   else if (event.key === "soccer" && event.displayClock) parts.push(event.displayClock);
   else if (event.period) parts.push(`Period ${event.period}`);
   if (event.key !== "soccer" && event.displayClock) parts.push(event.displayClock);
@@ -399,7 +510,8 @@ function formatLiveDetail(event) {
 }
 
 function getStatusLabel(event) {
-  if (event.status === "live") return `LIVE · ${formatLiveDetail(event)}`;
+  if (event.status === "standings") return `TOP ${SOCCER_STANDINGS_LIMIT}`;
+  if (event.status === "live") return `LIVE - ${formatLiveDetail(event)}`;
   if (event.status === "finished") return "FINAL";
   return event.status.toUpperCase();
 }
@@ -417,16 +529,9 @@ async function fetchEspnJson(url) {
 
 async function fetchSportsEvents() {
   const tasks = [];
+  const dateKeys = getSportsDateKeys();
   if (state.sports.showNba) {
-    tasks.push(
-      fetchEspnJson("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard")
-        .then((data) => (data.events || []).map((e) => parseEspnEvent("nba", "NBA", e)).filter(Boolean))
-    );
-    const dateOffsetTargets = [1, 2, 3];
-    dateOffsetTargets.forEach((offsetDays) => {
-      const target = new Date();
-      target.setDate(target.getDate() + offsetDays);
-      const dateStr = `${target.getFullYear()}${String(target.getMonth() + 1).padStart(2, "0")}${String(target.getDate()).padStart(2, "0")}`;
+    dateKeys.forEach((dateStr) => {
       tasks.push(
         fetchEspnJson(`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=${dateStr}`)
           .then((data) => (data.events || []).map((e) => parseEspnEvent("nba", "NBA", e)).filter(Boolean))
@@ -434,39 +539,40 @@ async function fetchSportsEvents() {
     });
   }
   if (state.sports.showSoccer) {
-    const leagues = [
-      ["eng.1", "Premier League"],
-      ["esp.1", "LaLiga"],
-      ["ger.1", "Bundesliga"],
-      ["ita.1", "Serie A"],
-      ["fra.1", "Ligue 1"],
-      ["uefa.champions", "Champions League"]
-    ];
-    leagues.forEach(([code, name]) => {
-      tasks.push(fetchEspnJson(`https://site.api.espn.com/apis/site/v2/sports/soccer/${code}/scoreboard`)
-        .then((data) => (data.events || []).map((e) => parseEspnEvent("soccer", name, e)).filter(Boolean)));
+    SOCCER_STANDING_LEAGUES.forEach(([code, name], index) => {
+      tasks.push(
+        fetchEspnJson(`https://site.api.espn.com/apis/v2/sports/soccer/${code}/standings`)
+          .then((data) => [parseSoccerStandings(name, index, data)].filter(Boolean))
+      );
     });
-  }
-  if (state.sports.showF1) {
-    tasks.push(fetchEspnJson("https://site.api.espn.com/apis/site/v2/sports/racing/f1/scoreboard")
-      .then((data) => (data.events || []).map((e) => parseEspnEvent("f1", "Formula 1", e)).filter(Boolean)));
+    MAJOR_SOCCER_COMPETITIONS.forEach(([code, name]) => {
+      dateKeys.forEach((dateStr) => {
+        tasks.push(
+          fetchEspnJson(`https://site.api.espn.com/apis/site/v2/sports/soccer/${code}/scoreboard?dates=${dateStr}`)
+            .then((data) => (data.events || []).map((e) => parseEspnEvent("soccer", name, e)).filter(Boolean))
+        );
+      });
+    });
   }
   const settled = await Promise.allSettled(tasks);
   const events = settled
     .filter((item) => item.status === "fulfilled")
     .flatMap((item) => item.value);
   const unique = new Map();
-  events.forEach((event) => {
-    const key = `${event.league}-${event.home.name}-${event.away.name}-${event.date}`;
+  events.filter((event) => isGameInsideSportsWindow(event, dateKeys)).forEach((event) => {
+    const key = event.type === "standings"
+      ? `${event.league}-standings`
+      : `${event.league}-${event.home.name}-${event.away.name}-${event.date}`;
     unique.set(key, event);
   });
   return Array.from(unique.values());
 }
 
 function eventSortValue(status) {
-  if (status === "live") return 0;
-  if (status === "upcoming") return 1;
-  return 2;
+  if (status === "standings") return 0;
+  if (status === "live") return 1;
+  if (status === "upcoming") return 2;
+  return 3;
 }
 
 function renderTeamRow(team) {
@@ -482,6 +588,18 @@ function renderTeamRow(team) {
   `;
 }
 
+function renderStandingRows(rows) {
+  return rows.map((team) => `
+    <div class="standing-row">
+      <span class="standing-rank">${team.rank}</span>
+      <img class="team-logo" src="${team.logo || "https://www.google.com/s2/favicons?domain=espn.com&sz=128"}" alt="${team.name}" />
+      <span class="standing-team">${team.name}</span>
+      <span class="standing-record">${team.record}</span>
+      <span class="standing-points">${team.points}</span>
+    </div>
+  `).join("");
+}
+
 function renderSportsCards(events) {
   ui.sportsCards.innerHTML = "";
   if (!events.length) {
@@ -494,16 +612,18 @@ function renderSportsCards(events) {
   const groups = {
     live: events.filter((e) => e.status === "live"),
     upcoming: events.filter((e) => e.status === "upcoming"),
+    standings: events.filter((e) => e.status === "standings"),
     finished: events.filter((e) => e.status === "finished")
   };
-  ["live", "upcoming", "finished"].forEach((groupKey) => {
+  ["live", "upcoming", "finished", "standings"].forEach((groupKey) => {
     if (!groups[groupKey].length) return;
     const title = document.createElement("p");
     title.className = "sport-group-title";
     title.textContent = groupKey;
     ui.sportsCards.appendChild(title);
     const groupEvents = groups[groupKey].sort((a, b) => {
-      if (groupKey === "upcoming" && a.key !== b.key) {
+      if (groupKey === "standings") return (a.sortOrder || 0) - (b.sortOrder || 0);
+      if (a.key !== b.key) {
         if (a.key === "nba") return -1;
         if (b.key === "nba") return 1;
       }
@@ -512,19 +632,39 @@ function renderSportsCards(events) {
     const maxItems = groupKey === "upcoming" ? 8 : 5;
     groupEvents.slice(0, maxItems).forEach((event) => {
       const card = document.createElement("article");
-      card.className = "sport-card";
-      card.innerHTML = `
-        <div class="sport-head">
-          <span class="sport-league">${event.league}</span>
-          <span class="sport-status ${event.status}">${getStatusLabel(event)}</span>
-        </div>
-        <div class="sport-match">
-          ${renderTeamRow(event.away)}
-          ${renderTeamRow(event.home)}
-        </div>
-        <p class="sport-time">${getEventTimeText(event)}</p>
-        <p class="sport-extra">${event.status === "live" ? "Live game detail updates with the feed." : event.note || ""}</p>
-      `;
+      card.className = event.type === "standings" ? "sport-card standings-card" : "sport-card";
+      if (event.type === "standings") {
+        card.innerHTML = `
+          <div class="sport-head">
+            <span class="sport-league">${event.league}</span>
+            <span class="sport-status standings">${getStatusLabel(event)}</span>
+          </div>
+          <div class="standings-list">
+            <div class="standing-row standing-header">
+              <span>#</span>
+              <span></span>
+              <span>Club</span>
+              <span>W-D-L</span>
+              <span>Pts</span>
+            </div>
+            ${renderStandingRows(event.standings)}
+          </div>
+          <p class="sport-extra">${event.note}</p>
+        `;
+      } else {
+        card.innerHTML = `
+          <div class="sport-head">
+            <span class="sport-league">${event.league}</span>
+            <span class="sport-status ${event.status}">${getStatusLabel(event)}</span>
+          </div>
+          <div class="sport-match">
+            ${renderTeamRow(event.away)}
+            ${renderTeamRow(event.home)}
+          </div>
+          <p class="sport-time">${getEventTimeText(event)}</p>
+          <p class="sport-extra">${event.status === "live" ? "Live game detail updates with the feed." : event.note || ""}</p>
+        `;
+      }
       ui.sportsCards.appendChild(card);
     });
   });
@@ -532,22 +672,22 @@ function renderSportsCards(events) {
 
 async function loadSports() {
   ui.sportsMeta.textContent = "Refreshing sports feed...";
+  const allowedDateKeys = getSportsDateKeys();
   try {
     const events = await fetchSportsEvents();
     const filtered = events
-      .filter((e) => (e.key === "nba" && state.sports.showNba) || (e.key === "soccer" && state.sports.showSoccer) || (e.key === "f1" && state.sports.showF1))
+      .filter((e) => (e.key === "nba" && state.sports.showNba) || (e.key === "soccer" && state.sports.showSoccer))
+      .filter((e) => isGameInsideSportsWindow(e, allowedDateKeys))
       .sort((a, b) => eventSortValue(a.status) - eventSortValue(b.status) || new Date(a.date) - new Date(b.date));
     if (!filtered.length) throw new Error("no events");
     renderSportsCards(filtered);
-    ui.sportsMeta.textContent = "Live/upcoming/final from ESPN scoreboard feeds.";
+    ui.sportsMeta.textContent = `Live ESPN feed, limited to ${getSportsDateLabel()}. Updated ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.`;
   } catch {
-    const fallback = getFallbackSportsData().filter((e) =>
-      (e.key === "nba" && state.sports.showNba) ||
-      (e.key === "soccer" && state.sports.showSoccer) ||
-      (e.key === "f1" && state.sports.showF1)
-    );
+    const fallback = getFallbackSportsData()
+      .filter((e) => (e.key === "nba" && state.sports.showNba) || (e.key === "soccer" && state.sports.showSoccer))
+      .filter((e) => isGameInsideSportsWindow(e, allowedDateKeys));
     renderSportsCards(fallback);
-    ui.sportsMeta.textContent = "Feed unavailable now, showing fallback schedule.";
+    ui.sportsMeta.textContent = "Feed unavailable now, showing limited fallback cards.";
   }
 }
 
@@ -566,6 +706,7 @@ function setupEvents() {
     state.timeZone = ui.timeZoneSelect.value;
     persistState();
     updateClock();
+    loadSports();
   });
   ui.searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -611,11 +752,6 @@ function setupEvents() {
     persistState();
     loadSports();
   });
-  ui.toggleF1.addEventListener("change", () => {
-    state.sports.showF1 = ui.toggleF1.checked;
-    persistState();
-    loadSports();
-  });
   ui.refreshSports.addEventListener("click", () => {
     loadSports();
   });
@@ -624,7 +760,6 @@ function setupEvents() {
 function hydrateUiState() {
   ui.toggleNba.checked = state.sports.showNba;
   ui.toggleSoccer.checked = state.sports.showSoccer;
-  ui.toggleF1.checked = state.sports.showF1;
   ui.timeZoneSelect.value = state.timeZone;
 }
 
@@ -638,8 +773,10 @@ function init() {
   renderApps();
   renderCalendar();
   loadSports();
+  setInterval(loadSports, SPORTS_REFRESH_MS);
   setupEvents();
   persistState();
 }
 
 init();
+

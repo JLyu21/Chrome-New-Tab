@@ -775,6 +775,11 @@ h3 {
   color: #d8d2cd;
 }
 
+.sport-status.standings {
+  background: rgba(255, 207, 107, 0.18);
+  color: #fff1c6;
+}
+
 .sport-match {
   margin: 0 0 8px;
   display: grid;
@@ -814,6 +819,51 @@ h3 {
 .team-score {
   font-weight: 800;
   font-size: 1rem;
+}
+
+.standings-card {
+  min-width: 0;
+}
+
+.standings-list {
+  display: grid;
+  gap: 7px;
+}
+
+.standing-row {
+  display: grid;
+  grid-template-columns: 22px 26px minmax(0, 1fr) auto 34px;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.standing-header {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.standing-rank,
+.standing-points {
+  font-weight: 900;
+}
+
+.standing-team {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.standing-record {
+  color: var(--muted);
+  font-size: 0.73rem;
+  white-space: nowrap;
 }
 
 .sport-time,

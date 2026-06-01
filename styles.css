@@ -577,12 +577,12 @@ h3 {
 }
 
 .media-stage {
-  min-height: 184px;
+  min-height: 158px;
   display: grid;
-  grid-template-columns: minmax(90px, 112px) minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(82px, 104px) minmax(0, 1fr);
+  gap: 14px;
   align-items: center;
-  padding: clamp(14px, 1.7vw, 20px);
+  padding: clamp(12px, 1.35vw, 16px);
   border: 1px solid var(--border);
   border-radius: 8px;
   background:
@@ -684,7 +684,7 @@ h3 {
 .media-pill {
   width: fit-content;
   margin: 0;
-  padding: 5px 8px;
+  padding: 4px 8px;
   border: 1px solid rgba(132, 232, 255, 0.36);
   border-radius: 999px;
   color: var(--accent-2);
@@ -696,15 +696,19 @@ h3 {
 }
 
 .media-stage h3 {
-  margin: 12px 0 0;
-  font-size: clamp(1.35rem, 2.4vw, 2.15rem);
-  line-height: 1.02;
+  margin: 8px 0 0;
+  font-size: clamp(1.18rem, 1.9vw, 1.72rem);
+  line-height: 1.14;
   letter-spacing: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   overflow-wrap: anywhere;
 }
 
 .media-source {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   color: var(--muted);
   font-size: 0.92rem;
   font-weight: 800;
@@ -714,7 +718,7 @@ h3 {
 
 .media-transport,
 .media-actions {
-  margin-top: 12px;
+  margin-top: 8px;
   display: grid;
   gap: 8px;
 }
@@ -729,7 +733,9 @@ h3 {
 
 .media-transport .button,
 .media-actions .button {
-  min-height: 42px;
+  min-height: 38px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .media-play {
@@ -738,22 +744,31 @@ h3 {
 }
 
 .media-note {
-  margin-top: 12px;
+  margin-top: 8px;
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: 1px solid rgba(235, 244, 255, 0.16);
   border-radius: 8px;
   background: rgba(235, 244, 255, 0.06);
   color: var(--muted);
   font-size: 0.84rem;
   font-weight: 800;
+  line-height: 1.2;
 }
 
 .media-note strong {
   color: var(--accent-2);
   text-align: right;
+}
+
+.media-note span,
+.media-note strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @keyframes media-pulse {

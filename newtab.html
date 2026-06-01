@@ -17,16 +17,8 @@
         <div class="hero-left">
           <p id="greeting" class="eyebrow">Good day</p>
           <h1 id="heroTitle">Hi Jay</h1>
-          <div class="signal-status" aria-live="polite">
-            <span id="signalSeal" class="signal-seal" aria-hidden="true">✦</span>
-            <div class="signal-copy">
-              <p class="signal-kicker">Signal Phase // Ambient Sync</p>
-              <p id="heroStatus" class="signal-readout">Calibrating the skyline...</p>
-              <p id="signalDetail" class="signal-detail">Finding the current mood layer...</p>
-            </div>
-          </div>
           <form id="searchForm" class="search-form">
-            <input id="searchInput" type="text" placeholder="Search Google, paste a URL, check scores, start anything..." autocomplete="off" />
+            <input id="searchInput" type="text" placeholder="Search Google, paste a URL, open anything..." autocomplete="off" />
             <button class="button" type="submit">Search</button>
           </form>
         </div>
@@ -99,18 +91,42 @@
           <div id="calendarGrid" class="calendar-grid" aria-label="Calendar days"></div>
         </section>
 
-        <section class="card pane sports-panel">
+        <section class="card pane media-panel">
           <div class="pane-title">
-            <h2>Sports Hub</h2>
-            <span class="muted">NBA + elite soccer</span>
+            <h2>Now Playing</h2>
+            <span id="mediaMeta" class="muted">Listening</span>
           </div>
-          <div class="sports-controls">
-            <label><input id="toggleNba" type="checkbox" checked /> NBA</label>
-            <label><input id="toggleSoccer" type="checkbox" checked /> Soccer</label>
-            <button id="refreshSports" class="button button-small button-secondary" type="button">Refresh</button>
+          <div class="media-stage">
+            <div class="media-art">
+              <img id="mediaFavicon" alt="" />
+              <div class="media-bars" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+            <div class="media-copy">
+              <p id="mediaStatePill" class="media-pill">No audio detected</p>
+              <h3 id="mediaTitle">Nothing playing in Chrome</h3>
+              <p id="mediaSource" class="media-source">Start YouTube, Spotify web, or Netease web in another tab.</p>
+            </div>
           </div>
-          <p id="sportsMeta" class="muted">Loading latest scoreboard feed...</p>
-          <div id="sportsCards" class="sports-cards"></div>
+          <div class="media-transport" aria-label="Playback controls">
+            <button id="mediaPrev" class="button button-small button-secondary" type="button" disabled>Prev</button>
+            <button id="mediaBack" class="button button-small button-secondary" type="button" disabled>-10s</button>
+            <button id="mediaPlayPause" class="button button-small media-play" type="button" disabled>Play</button>
+            <button id="mediaForward" class="button button-small button-secondary" type="button" disabled>+10s</button>
+            <button id="mediaNext" class="button button-small button-secondary" type="button" disabled>Next</button>
+          </div>
+          <div class="media-actions">
+            <button id="mediaOpen" class="button button-small" type="button" disabled>Open tab</button>
+            <button id="mediaMute" class="button button-small button-secondary" type="button" disabled>Mute</button>
+          </div>
+          <div class="media-note">
+            <span>Browser tabs only</span>
+            <strong id="mediaStatus">Ready</strong>
+          </div>
         </section>
       </section>
     </main>
@@ -125,6 +141,6 @@
       </li>
     </template>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=1.0.1"></script>
   </body>
 </html>

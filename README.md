@@ -9,7 +9,7 @@ A plain HTML/CSS/JavaScript new tab browser extension for Chrome (MV3), with:
 - Calendar in the left dashboard column
 - Google search and URL launching
 - App shortcuts persisted in `localStorage`
-- Sports scoreboard cards
+- Ambient Rhythm Deck with current phase, mood, countdown, and daily timeline
 - Day and year progress widget
 - Light/dark mode toggle
 
@@ -42,7 +42,7 @@ Temporary Firefox add-ons are removed when Firefox restarts. For a permanent ins
 
 ## Cross-browser notes
 
-- The extension uses standard web APIs and should work in Chromium-based browsers that support MV3.
+- The new tab UI uses standard web APIs and localStorage for preferences and shortcuts.
 - The animated wallpaper is a local MP4 file rendered with a muted, looping `<video>` background.
 - `chrome_url_overrides.newtab` is supported in Firefox for replacing the new tab page.
 - `browser_specific_settings` is included for Firefox metadata, but Firefox has partial MV3 differences. If needed, a separate Firefox packaging pass can be added later.
